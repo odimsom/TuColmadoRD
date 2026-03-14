@@ -38,9 +38,26 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
             SalePrice = sale;
             ItbisRate = itbis;
 
-            string label = unitType == UnitType.Mass ? "Lb" : "Ud";
-            StockQuantity = Quantity.Create(0, label, unitType).Result!;
-            MinStock = Quantity.Create(5, label, unitType).Result!;
+            string label = unitType switch
+            {
+                UnitType.Mass => "Lb",
+                UnitType.Volume => "Lt",
+                _ => "Ud"
+            };
+
+            var stockQuantityResult = Quantity.Create(0, label, unitType);
+            if (!stockQuantityResult.IsGood)
+            {
+                throw new InvalidOperationException(stockQuantityResult.Error ?? "Error al crear la cantidad inicial de stock.");
+            }
+            StockQuantity = stockQuantityResult.Result!;
+
+            var minStockResult = Quantity.Create(5, label, unitType);
+            if (!minStockResult.IsGood)
+            {
+                throw new InvalidOperationException(minStockResult.Error ?? "Error al crear la cantidad mínima de stock.");
+            }
+            MinStock = minStockResult.Result!;
         }
 
         public static OperationResult<Product, string> Create(
