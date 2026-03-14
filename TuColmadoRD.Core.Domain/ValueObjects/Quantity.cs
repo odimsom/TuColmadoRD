@@ -5,9 +5,9 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
 {
     public record Quantity
     {
-        public decimal Value { get; init; }
-        public string UnitLabel { get; init; }
-        public UnitType Type { get; init; }
+        public decimal Value { get; private init; }
+        public string UnitLabel { get; private init; }
+        public UnitType Type { get; private init; }
 
         private Quantity(decimal value, string unitLabel, UnitType type)
         {
