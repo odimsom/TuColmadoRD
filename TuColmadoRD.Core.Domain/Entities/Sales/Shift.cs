@@ -4,7 +4,7 @@ using TuColmadoRD.Core.Domain.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
-    public class Shift
+    public class Shift : ITenantEntity
     {
         public Guid Id { get; private set; }
         public Guid TenantId { get; private set; }
