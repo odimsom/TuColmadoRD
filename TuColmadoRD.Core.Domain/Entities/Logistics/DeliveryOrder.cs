@@ -2,7 +2,6 @@
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Logistics;
 using TuColmadoRD.Core.Domain.ValueObjects;
-using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Logistics
 {
