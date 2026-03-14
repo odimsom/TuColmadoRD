@@ -2,8 +2,8 @@
 {
     public enum FiscalReceiptType
     {
-        FinalConsumer = 01,      
-        TaxCredit = 02,          
+        FinalConsumer = 1,      
+        TaxCredit = 2,          
         Government = 15,         
         SpecialRegime = 14,      
         ElectronicConsumer = 31, 
