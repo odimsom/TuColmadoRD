@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
+﻿namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
 {
-    public class MovementType
+    public enum MovementType
     {
+        InputPurchase = 1,
+        InputAdjustment = 2,
+        OutputSale = 3,
+        OutputAdjustment = 4,
+        OutputReturn = 5
     }
 }

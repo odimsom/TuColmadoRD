@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace TuColmadoRD.Core.Domain.Enums.Customers
 {
-    public class TransactionType
+    public enum TransactionType
     {
+        Charge = 1,
+        Credit = 2
     }
 }

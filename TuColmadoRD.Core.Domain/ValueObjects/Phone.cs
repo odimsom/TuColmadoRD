@@ -1,12 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
+using TuColmadoRD.Core.Domain.Base.Result;
 
 namespace TuColmadoRD.Core.Domain.ValueObjects
 {
-    public class Phone
+    public record Phone
     {
+        public string Value { get; init; }
+
+        private Phone(string value) => Value = value;
+
+        public static OperationResult<Phone, string> Create(string? input)
+        {
+            var sanitized = Regex.Replace(input ?? "", @"[^0-9]", "");
+
+            if (sanitized.Length != 10)
+                return OperationResult<Phone, string>.Bad("El teléfono debe tener 10 dígitos.");
+
+            if (!Regex.IsMatch(sanitized, @"^(809|829|849)"))
+                return OperationResult<Phone, string>.Bad("El prefijo no corresponde a República Dominicana.");
+
+            return OperationResult<Phone, string>.Good(new Phone(sanitized));
+        }
+
+        public string ToFormattedString() 
+            => $"({Value.Substring(0, 3)}) {Value.Substring(3, 3)}-{Value.Substring(6)}";
     }
 }
