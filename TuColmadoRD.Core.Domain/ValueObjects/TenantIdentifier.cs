@@ -1,6 +1,6 @@
 ﻿using TuColmadoRD.Core.Domain.Base.Result;
 
-namespace TuColmadoRD.Domain.Core.ValueObjects
+namespace TuColmadoRD.Core.Domain.ValueObjects
 {
     public record TenantIdentifier
     {
