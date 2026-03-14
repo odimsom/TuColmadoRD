@@ -4,7 +4,7 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
 {
     public record TenantIdentifier
     {
-        public Guid Value { get; init; }
+        public Guid Value { get; private init; }
 
         private TenantIdentifier(Guid value) => Value = value;
 
