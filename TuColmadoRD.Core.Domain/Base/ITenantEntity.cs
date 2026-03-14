@@ -1,4 +1,4 @@
-﻿using TuColmadoRD.Domain.Core.ValueObjects;
+﻿using TuColmadoRD.Core.Domain.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Base
 {
