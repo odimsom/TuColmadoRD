@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
+﻿namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
 {
-    public class SupplierType
+    public enum SupplierType
     {
+        Wholesaler = 1,
+        Manufacturer = 2,
+        Informal = 3
     }
 }

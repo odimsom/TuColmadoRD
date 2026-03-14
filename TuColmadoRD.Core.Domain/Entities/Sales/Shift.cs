@@ -1,12 +1,77 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Core.Domain.Enums.Sales;
+using TuColmadoRD.Core.Domain.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
-    public class Shift
+    public class Shift : ITenantEntity
     {
+        public Guid Id { get; private set; }
+        public Guid TenantId { get; private set; }
+        public Guid CashierId { get; private set; }
+
+        public DateTime StartTime { get; private set; }
+        public DateTime? EndTime { get; private set; }
+
+        public Money InitialCash { get; private set; }
+        public Money? ActualCashAtClose { get; private set; }
+        public ShiftStatus Status { get; private set; }
+
+        public Money TotalCashSales { get; private set; } = Money.Zero;
+        public Money TotalCreditSales { get; private set; } = Money.Zero;
+        public Money TotalCardSales { get; private set; } = Money.Zero;
+        public Money TotalTransferSales { get; private set; } = Money.Zero;
+
+        private Shift(Guid tenantId, Guid cashierId, Money initialCash)
+        {
+            Id = Guid.NewGuid();
+            TenantId = tenantId;
+            CashierId = cashierId;
+            InitialCash = initialCash;
+            StartTime = DateTime.UtcNow;
+            Status = ShiftStatus.Open;
+        }
+
+        public static OperationResult<Shift, string> Open(Guid tenantId, Guid cashierId, Money initialCash)
+        {
+            if (tenantId == Guid.Empty) return OperationResult<Shift, string>.Bad("TenantId requerido.");
+
+            return OperationResult<Shift, string>.Good(new Shift(tenantId, cashierId, initialCash));
+        }
+
+        public void RegisterSale(PaymentMethod method, Money amount)
+        {
+            switch (method)
+            {
+                case PaymentMethod.Cash:
+                    TotalCashSales = TotalCashSales + amount;
+                    break;
+                case PaymentMethod.Credit:
+                    TotalCreditSales = TotalCreditSales + amount;
+                    break;
+                case PaymentMethod.Card:
+                    TotalCardSales = TotalCardSales + amount;
+                    break;
+                case PaymentMethod.Transfer:
+                    TotalTransferSales = TotalTransferSales + amount;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(method), method, "Método de pago no soportado.");
+            }
+        }
+
+        public OperationResult<bool, string> Close(Money actualCash)
+        {
+            if (Status != ShiftStatus.Open)
+                return OperationResult<bool, string>.Bad("El turno ya está cerrado o suspendido.");
+
+            ActualCashAtClose = actualCash;
+            EndTime = DateTime.UtcNow;
+            Status = ShiftStatus.Closed;
+
+            return OperationResult<bool, string>.Good(true);
+        }
+
+        public Money ExpectedCash => InitialCash + TotalCashSales;
     }
 }

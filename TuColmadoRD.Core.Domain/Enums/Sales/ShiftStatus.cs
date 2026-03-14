@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Sales
+﻿namespace TuColmadoRD.Core.Domain.Enums.Sales
 {
-    public class ShiftStatus
+    public enum ShiftStatus
     {
+        Open = 1,
+        Closed = 2,
+        Suspended = 3
     }
 }

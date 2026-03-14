@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace TuColmadoRD.Core.Domain.Enums.Sales
 {
-    public class OrderType
+    public enum OrderType
     {
+        InStore = 1,
+        Delivery = 2
     }
 }

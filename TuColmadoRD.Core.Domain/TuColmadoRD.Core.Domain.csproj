@@ -16,14 +16,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Entities\Inventory\" />
     <Folder Include="Entities\Customers\" />
     <Folder Include="Entities\Fiscal\" />
     <Folder Include="Entities\Logistics\" />
     <Folder Include="Entities\HumanResources\" />
     <Folder Include="Entities\Purchasing\" />
     <Folder Include="Entities\Sales\" />
-    <Folder Include="Errors\" />
   </ItemGroup>
 
 </Project>

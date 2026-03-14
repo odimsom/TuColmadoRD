@@ -6,7 +6,11 @@ using System.Threading.Tasks;
 
 namespace TuColmadoRD.Core.Domain.Enums.Sales
 {
-    public class PaymentMethod
+    public enum PaymentMethod
     {
+        Cash = 1,
+        Credit = 2,
+        Card = 3,
+        Transfer = 4
     }
 }

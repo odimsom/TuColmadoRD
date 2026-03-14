@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
+﻿namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
 {
-    public class PurchaseStatus
+    public enum PurchaseStatus
     {
+        Ordered = 1,
+        Received = 2,
+        Paid = 3,
+        Cancelled = 4
     }
 }

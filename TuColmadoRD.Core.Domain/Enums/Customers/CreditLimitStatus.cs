@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Customers
+﻿namespace TuColmadoRD.Core.Domain.Enums.Customers
 {
-    public class CreditLimitStatus
+    public enum CreditLimitStatus
     {
+        Healthy = 1,
+        NearLimit = 2,
+        Exceeded = 3
     }
 }
