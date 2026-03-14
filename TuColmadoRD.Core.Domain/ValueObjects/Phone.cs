@@ -5,7 +5,7 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
 {
     public record Phone
     {
-        public string Value { get; init; }
+        public string Value { get; private init; }
 
         private Phone(string value) => Value = value;
 
