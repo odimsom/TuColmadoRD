@@ -5,7 +5,7 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
 {
     public record Cedula
     {
-        public string Value { get; init; }
+        public string Value { get; private init; }
         private Cedula(string value)
         {
             Value = value;
