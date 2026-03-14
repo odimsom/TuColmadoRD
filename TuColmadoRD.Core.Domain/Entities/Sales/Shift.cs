@@ -19,6 +19,8 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
 
         public Money TotalCashSales { get; private set; } = Money.Zero;
         public Money TotalCreditSales { get; private set; } = Money.Zero;
+        public Money TotalCardSales { get; private set; } = Money.Zero;
+        public Money TotalTransferSales { get; private set; } = Money.Zero;
 
         private Shift(Guid tenantId, Guid cashierId, Money initialCash)
         {
@@ -39,10 +41,23 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
 
         public void RegisterSale(PaymentMethod method, Money amount)
         {
-            if (method == PaymentMethod.Cash)
-                TotalCashSales = TotalCashSales + amount;
-            else if (method == PaymentMethod.Credit)
-                TotalCreditSales = TotalCreditSales + amount;
+            switch (method)
+            {
+                case PaymentMethod.Cash:
+                    TotalCashSales = TotalCashSales + amount;
+                    break;
+                case PaymentMethod.Credit:
+                    TotalCreditSales = TotalCreditSales + amount;
+                    break;
+                case PaymentMethod.Card:
+                    TotalCardSales = TotalCardSales + amount;
+                    break;
+                case PaymentMethod.Transfer:
+                    TotalTransferSales = TotalTransferSales + amount;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(method), method, "Método de pago no soportado.");
+            }
         }
 
         public OperationResult<bool, string> Close(Money actualCash)
