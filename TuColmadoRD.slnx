@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/core/">
+    <Project Path="TuColmadoRD.Core.Domain/TuColmadoRD.Core.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/infrastructure/" />
+  <Folder Name="/src/Presentations/" />
+</Solution>
