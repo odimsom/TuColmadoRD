@@ -2,13 +2,14 @@
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Inventory
 {
     public class Product : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public Guid CategoryId { get; private set; }
 
         public string Name { get; private set; }
@@ -26,7 +27,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
         public TaxRate ItbisRate { get; private set; }
         public TaxRate? IscRate { get; private set; }
 
-        private Product(Guid tenantId, string name, Guid categoryId, UnitType unitType, Money cost, Money sale, TaxRate itbis)
+        private Product(TenantIdentifier tenantId, string name, Guid categoryId, UnitType unitType, Money cost, Money sale, TaxRate itbis)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -61,10 +62,9 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
         }
 
         public static OperationResult<Product, string> Create(
-            Guid tenantId, string name, Guid categoryId, UnitType unitType,
+            TenantIdentifier tenantId, string name, Guid categoryId, UnitType unitType,
             Money cost, Money sale, TaxRate itbis, string? barcode = null)
         {
-            if (tenantId == Guid.Empty) return OperationResult<Product, string>.Bad("TenantId requerido.");
             if (string.IsNullOrWhiteSpace(name)) return OperationResult<Product, string>.Bad("Nombre requerido.");
             if (sale.Amount <= cost.Amount) return OperationResult<Product, string>.Bad("El precio de venta debe dejar margen de ganancia.");
 

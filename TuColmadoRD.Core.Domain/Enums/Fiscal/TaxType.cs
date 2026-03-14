@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Fiscal
+﻿namespace TuColmadoRD.Core.Domain.Enums.Fiscal
 {
-    public class TaxType
+    public enum TaxType
     {
+        ITBIS = 1,
+        ISC = 2,
+        Exempt = 3
     }
 }

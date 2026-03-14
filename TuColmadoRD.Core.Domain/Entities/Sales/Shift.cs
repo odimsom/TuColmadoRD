@@ -1,13 +1,15 @@
-﻿using TuColmadoRD.Core.Domain.Base.Result;
+﻿using TuColmadoRD.Core.Domain.Base;
+using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Sales;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
     public class Shift : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public Guid CashierId { get; private set; }
 
         public DateTime StartTime { get; private set; }
@@ -22,7 +24,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         public Money TotalCardSales { get; private set; } = Money.Zero;
         public Money TotalTransferSales { get; private set; } = Money.Zero;
 
-        private Shift(Guid tenantId, Guid cashierId, Money initialCash)
+        private Shift(TenantIdentifier tenantId, Guid cashierId, Money initialCash)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -32,10 +34,8 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
             Status = ShiftStatus.Open;
         }
 
-        public static OperationResult<Shift, string> Open(Guid tenantId, Guid cashierId, Money initialCash)
+        public static OperationResult<Shift, string> Open(TenantIdentifier tenantId, Guid cashierId, Money initialCash)
         {
-            if (tenantId == Guid.Empty) return OperationResult<Shift, string>.Bad("TenantId requerido.");
-
             return OperationResult<Shift, string>.Good(new Shift(tenantId, cashierId, initialCash));
         }
 

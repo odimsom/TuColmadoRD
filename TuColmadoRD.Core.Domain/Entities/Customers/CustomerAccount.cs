@@ -2,13 +2,14 @@
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Customers;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Customers
 {
     public class CustomerAccount : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public Guid CustomerId { get; private set; }
         public Money Balance { get; private set; }
         public Money CreditLimit { get; private set; }
@@ -28,7 +29,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
             }
         }
 
-        private CustomerAccount(Guid tenantId, Guid customerId)
+        private CustomerAccount(TenantIdentifier tenantId, Guid customerId)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -38,7 +39,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
             LastActivity = DateTime.UtcNow;
         }
 
-        internal static CustomerAccount CreateNew(Guid tenantId, Guid customerId)
+        internal static CustomerAccount CreateNew(TenantIdentifier tenantId, Guid customerId)
         {
             return new CustomerAccount(tenantId, customerId);
         }

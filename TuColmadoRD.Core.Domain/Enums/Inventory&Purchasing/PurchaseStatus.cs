@@ -1,10 +1,10 @@
-﻿namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
+﻿namespace TuColmadoRD.Core.Domain.Enums.InventoryPurchasing
 {
     public enum PurchaseStatus
     {
-        Ordered = 1,
-        Received = 2,
-        Paid = 3,
+        Draft = 1,
+        Ordered = 2,
+        Received = 3,
         Cancelled = 4
     }
 }

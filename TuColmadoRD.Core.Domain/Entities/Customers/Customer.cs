@@ -1,13 +1,14 @@
 ﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Customers
 {
     public class Customer : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public string FullName { get; private set; }
         public Cedula DocumentId { get; private set; }
         public Phone? ContactPhone { get; private set; }
@@ -17,7 +18,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
 
         public CustomerAccount Account { get; private set; }
 
-        private Customer(Guid tenantId, string fullName, Cedula documentId, Phone? phone, Address? address)
+        private Customer(TenantIdentifier tenantId, string fullName, Cedula documentId, Phone? phone, Address? address)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -32,15 +33,12 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
         }
 
         public static OperationResult<Customer, string> Create(
-            Guid tenantId,
+            TenantIdentifier tenantId,
             string fullName,
             Cedula documentId,
             Phone? phone = null,
             Address? address = null)
         {
-            if (tenantId == Guid.Empty)
-                return OperationResult<Customer, string>.Bad("Error de seguridad: No se especificó el ID del Colmado (Tenant).");
-
             if (string.IsNullOrWhiteSpace(fullName))
                 return OperationResult<Customer, string>.Bad("El nombre completo es obligatorio.");
 

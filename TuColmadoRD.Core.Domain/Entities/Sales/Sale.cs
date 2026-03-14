@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Sales;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
     public class Sale : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
         public Guid? CustomerId { get; private set; }
@@ -25,7 +22,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         public SaleStatus Status { get; private set; }
         public PaymentMethod PaymentMethod { get; private set; }
 
-        private Sale(Guid tenantId, PaymentMethod paymentMethod, Guid? customerId)
+        private Sale(TenantIdentifier tenantId, PaymentMethod paymentMethod, Guid? customerId)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -40,13 +37,10 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         }
 
         public static OperationResult<Sale, string> Create(
-            Guid tenantId,
+            TenantIdentifier tenantId,
             PaymentMethod paymentMethod,
             Guid? customerId = null)
         {
-            if (tenantId == Guid.Empty)
-                return OperationResult<Sale, string>.Bad("El TenantId es requerido.");
-
             if (paymentMethod == PaymentMethod.Credit && customerId == null)
                 return OperationResult<Sale, string>.Bad("No se puede realizar una venta a crédito (Fiado) sin un cliente.");
 

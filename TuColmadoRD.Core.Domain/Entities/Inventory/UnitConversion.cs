@@ -1,19 +1,20 @@
 ﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Inventory
 {
     public class UnitConversion : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public Guid ProductId { get; private set; }
 
         public UnitOfMeasureEntity FromUnit { get; private set; }
         public UnitOfMeasureEntity ToUnit { get; private set; }
         public decimal Factor { get; private set; }
 
-        private UnitConversion(Guid tenantId, Guid productId, UnitOfMeasureEntity fromUnit, UnitOfMeasureEntity toUnit, decimal factor)
+        private UnitConversion(TenantIdentifier tenantId, Guid productId, UnitOfMeasureEntity fromUnit, UnitOfMeasureEntity toUnit, decimal factor)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -24,13 +25,12 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
         }
 
         public static OperationResult<UnitConversion, string> Create(
-            Guid tenantId,
+            TenantIdentifier tenantId,
             Guid productId,
             UnitOfMeasureEntity fromUnit,
             UnitOfMeasureEntity toUnit,
             decimal factor)
         {
-            if (tenantId == Guid.Empty) return OperationResult<UnitConversion, string>.Bad("TenantId requerido.");
             if (factor <= 0) return OperationResult<UnitConversion, string>.Bad("El factor debe ser mayor a cero.");
             if (fromUnit is null) return OperationResult<UnitConversion, string>.Bad("Unidad de origen requerida.");
             if (toUnit is null) return OperationResult<UnitConversion, string>.Bad("Unidad de destino requerida.");
