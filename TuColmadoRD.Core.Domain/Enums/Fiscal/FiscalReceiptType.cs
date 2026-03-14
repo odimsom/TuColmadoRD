@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TuColmadoRD.Core.Domain.Enums.Fiscal
+﻿namespace TuColmadoRD.Core.Domain.Enums.Fiscal
 {
-    public class FiscalReceiptType
+    public enum FiscalReceiptType
     {
+        FinalConsumer = 1,      
+        TaxCredit = 2,          
+        Government = 15,         
+        SpecialRegime = 14,      
+        ElectronicConsumer = 31, 
+        ElectronicTaxCredit = 32 
     }
 }

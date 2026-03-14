@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TuColmadoRD.Core.Domain.Base;
+﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Inventory
 {
     public class Category : ITenantEntity
     {
         public Guid Id { get; private set; }
-        public Guid TenantId { get; private set; }
+        public TenantIdentifier TenantId { get; private set; }
         public string Name { get; private set; }
         public string? Description { get; private set; }
 
@@ -20,7 +16,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
 
         public bool IsActive { get; private set; }
 
-        private Category(Guid tenantId, string name, string? description, string? icon, string? color)
+        private Category(TenantIdentifier tenantId, string name, string? description, string? icon, string? color)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
@@ -32,15 +28,12 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
         }
 
         public static OperationResult<Category, string> Create(
-            Guid tenantId,
+            TenantIdentifier tenantId,
             string name,
             string? description = null,
             string? icon = null,
             string? color = "#3498db")
         {
-            if (tenantId == Guid.Empty)
-                return OperationResult<Category, string>.Bad("El TenantId es requerido para el SaaS.");
-
             if (string.IsNullOrWhiteSpace(name))
                 return OperationResult<Category, string>.Bad("El nombre de la categoría es obligatorio.");
 
