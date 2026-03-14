@@ -1,4 +1,4 @@
-﻿namespace TuColmadoRD.Core.Domain.Enums.InventoryPurchasing
+﻿namespace TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing
 {
     public enum PurchaseStatus
     {
