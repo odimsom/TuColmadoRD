@@ -32,7 +32,9 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
         {
             if (tenantId == Guid.Empty) return OperationResult<UnitConversion, string>.Bad("TenantId requerido.");
             if (factor <= 0) return OperationResult<UnitConversion, string>.Bad("El factor debe ser mayor a cero.");
-            if (fromUnit == toUnit) return OperationResult<UnitConversion, string>.Bad("No se requiere conversión para la misma unidad.");
+            if (fromUnit is null) return OperationResult<UnitConversion, string>.Bad("Unidad de origen requerida.");
+            if (toUnit is null) return OperationResult<UnitConversion, string>.Bad("Unidad de destino requerida.");
+            if (fromUnit.Id == toUnit.Id) return OperationResult<UnitConversion, string>.Bad("No se requiere conversión para la misma unidad.");
 
             return OperationResult<UnitConversion, string>.Good(
                 new UnitConversion(tenantId, productId, fromUnit, toUnit, factor)
