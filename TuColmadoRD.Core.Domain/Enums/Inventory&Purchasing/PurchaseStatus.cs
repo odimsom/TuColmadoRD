@@ -2,9 +2,10 @@
 {
     public enum PurchaseStatus
     {
-        Draft = 1,
-        Ordered = 2,
-        Received = 3,
+        Draft = 0,
+        Ordered = 1,
+        Received = 2,
+        Paid = 3,
         Cancelled = 4
     }
 }
