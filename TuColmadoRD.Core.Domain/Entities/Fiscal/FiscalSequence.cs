@@ -33,16 +33,16 @@ namespace TuColmadoRD.Core.Domain.Entities.Fiscal
             TenantIdentifier tenantId, FiscalReceiptType type, string prefix, long start, long end, DateTime expiration)
         {
             if (end <= start) return OperationResult<FiscalSequence, string>.Bad("El número final debe ser mayor al inicial.");
-            if (expiration <= DateTime.Now) return OperationResult<FiscalSequence, string>.Bad("La secuencia ya está vencida.");
+            if (expiration.ToUniversalTime() <= DateTime.UtcNow) return OperationResult<FiscalSequence, string>.Bad("La secuencia ya está vencida.");
 
-            return OperationResult<FiscalSequence, string>.Good(new FiscalSequence(tenantId, type, prefix, start, end, expiration));
+            return OperationResult<FiscalSequence, string>.Good(new FiscalSequence(tenantId, type, prefix, start, end, expiration.ToUniversalTime()));
         }
 
         public OperationResult<string, string> GetNextFullNumber()
         {
             if (!IsActive) return OperationResult<string, string>.Bad("Secuencia inactiva.");
             if (CurrentNumber > EndNumber) return OperationResult<string, string>.Bad("Secuencia agotada.");
-            if (DateTime.Now > ExpirationDate) return OperationResult<string, string>.Bad("Secuencia vencida.");
+            if (DateTime.UtcNow > ExpirationDate) return OperationResult<string, string>.Bad("Secuencia vencida.");
 
             string fullNumber = $"{Prefix}{(int)Type:D2}{CurrentNumber:D8}";
             CurrentNumber++;
