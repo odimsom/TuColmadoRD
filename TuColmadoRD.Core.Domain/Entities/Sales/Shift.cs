@@ -43,16 +43,16 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
             switch (method)
             {
                 case PaymentMethod.Cash:
-                    TotalCashSales = TotalCashSales + amount;
+                    TotalCashSales += amount;
                     break;
                 case PaymentMethod.Credit:
-                    TotalCreditSales = TotalCreditSales + amount;
+                    TotalCreditSales += amount;
                     break;
                 case PaymentMethod.Card:
-                    TotalCardSales = TotalCardSales + amount;
+                    TotalCardSales += amount;
                     break;
                 case PaymentMethod.Transfer:
-                    TotalTransferSales = TotalTransferSales + amount;
+                    TotalTransferSales += amount;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(method), method, "Método de pago no soportado.");

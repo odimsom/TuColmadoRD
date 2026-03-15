@@ -1,8 +1,7 @@
 ﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
-using TuColmadoRD.Core.Domain.Enums.InventoryPurchasing;
+using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.ValueObjects;
-using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Purchasing
 {
@@ -13,7 +12,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Purchasing
         public Guid SupplierId { get; private set; }
         public DateTime OrderDate { get; private set; }
         public PurchaseStatus Status { get; private set; }
-        public List<PurchaseDetail> Details { get; private set; } = new();
+        public List<PurchaseDetail> Details { get; private set; } = [];
         public Money TotalAmount { get; private set; }
 
         private PurchaseOrder(TenantIdentifier tenantId, Guid supplierId)

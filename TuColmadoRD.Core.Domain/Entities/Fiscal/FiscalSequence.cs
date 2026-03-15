@@ -1,7 +1,7 @@
 ﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Fiscal;
-using TuColmadoRD.Domain.Core.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Fiscal
 {

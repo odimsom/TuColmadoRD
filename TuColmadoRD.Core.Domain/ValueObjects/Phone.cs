@@ -23,6 +23,6 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
         }
 
         public string ToFormattedString() 
-            => $"({Value.Substring(0, 3)}) {Value.Substring(3, 3)}-{Value.Substring(6)}";
+            => $"({Value[..3]}) {Value.Substring(3, 3)}-{Value[6..]}";
     }
 }

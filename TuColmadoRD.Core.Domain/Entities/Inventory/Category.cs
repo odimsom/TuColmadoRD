@@ -1,6 +1,6 @@
 ﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
-using TuColmadoRD.Domain.Core.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Inventory
 {

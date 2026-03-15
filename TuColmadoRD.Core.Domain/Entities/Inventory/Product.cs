@@ -2,7 +2,6 @@
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.ValueObjects;
-using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Inventory
 {
@@ -33,7 +32,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
             TenantId = tenantId;
             CategoryId = categoryId;
             Name = name;
-            ShortName = name.Length > 20 ? name.Substring(0, 20) : name;
+            ShortName = name.Length > 20 ? name[..20] : name;
             UnitType = unitType;
             CostPrice = cost;
             SalePrice = sale;

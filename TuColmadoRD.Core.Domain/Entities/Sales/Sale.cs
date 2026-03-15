@@ -12,7 +12,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         public DateTime CreatedAt { get; private set; }
 
         public Guid? CustomerId { get; private set; }
-        public List<SaleDetail> Details { get; private set; } = new();
+        public List<SaleDetail> Details { get; private set; } = [];
 
         public Money SubTotal { get; private set; }
         public Money TaxTotal { get; private set; }

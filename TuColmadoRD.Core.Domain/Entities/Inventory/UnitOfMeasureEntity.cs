@@ -2,19 +2,11 @@
 
 namespace TuColmadoRD.Core.Domain.Entities.Inventory
 {
-    public class UnitOfMeasureEntity
+    public class UnitOfMeasureEntity(UnitOfMeasure id, string name, string abbreviation, bool isFractionable)
     {
-        public UnitOfMeasure Id { get; private set; }
-        public string Name { get; private set; }
-        public string Abbreviation { get; private set; }
-        public bool IsFractionable { get; private set; }
-
-        public UnitOfMeasureEntity(UnitOfMeasure id, string name, string abbreviation, bool isFractionable)
-        {
-            Id = id;
-            Name = name;
-            Abbreviation = abbreviation;
-            IsFractionable = isFractionable;
-        }
+        public UnitOfMeasure Id { get; private set; } = id;
+        public string Name { get; private set; } = name;
+        public string Abbreviation { get; private set; } = abbreviation;
+        public bool IsFractionable { get; private set; } = isFractionable;
     }
 }

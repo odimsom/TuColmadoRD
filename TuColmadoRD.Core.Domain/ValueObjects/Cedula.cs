@@ -32,7 +32,7 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
         private static bool VerifyDigit(string cedula)
         {
             int vnTotal = 0;
-            int[] weight = { 1, 2, 1, 2, 1, 2, 1, 2, 1, 2 };
+            int[] weight = [1, 2, 1, 2, 1, 2, 1, 2, 1, 2];
 
             for (int i = 0; i < 10; i++)
             {

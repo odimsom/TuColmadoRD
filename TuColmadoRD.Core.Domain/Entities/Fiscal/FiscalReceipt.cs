@@ -1,6 +1,5 @@
 ﻿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.ValueObjects;
-using TuColmadoRD.Domain.Core.ValueObjects;
 
 namespace TuColmadoRD.Core.Domain.Entities.Fiscal
 {
