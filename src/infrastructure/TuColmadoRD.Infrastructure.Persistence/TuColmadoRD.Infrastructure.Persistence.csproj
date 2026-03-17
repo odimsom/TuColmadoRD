@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Contexts\" />
+    <Folder Include="EntitiesConfigurations\" />
+    <Folder Include="EntitiesConfigurations\Audit\" />
+    <Folder Include="EntitiesConfigurations\Customers\" />
+    <Folder Include="EntitiesConfigurations\Fiscal\" />
+    <Folder Include="EntitiesConfigurations\HumanResources\" />
+    <Folder Include="EntitiesConfigurations\Inventory\" />
+    <Folder Include="EntitiesConfigurations\Logistics\" />
+    <Folder Include="EntitiesConfigurations\Purchasing\" />
+    <Folder Include="EntitiesConfigurations\Sales\" />
+    <Folder Include="EntitiesConfigurations\Treasury\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.2" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

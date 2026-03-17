@@ -1,0 +1,41 @@
+dotnet : C:\Users\Francisco C. Dev\so
+urce\repos\TuColmadoRD\src\Presentati
+ons\TuColmadoRD.Presentation.API\TuCo
+lmadoRD.Presentation.API.csproj : 
+warning NU1608: Detected package 
+version outside of dependency 
+constraint: Npgsql.EntityFrameworkCor
+e.PostgreSQL 9.0.4 requires 
+Microsoft.EntityFrameworkCore (>= 
+9.0.1 && < 10.0.0) but version 
+Microsoft.EntityFrameworkCore 10.0.5 
+was resolved.
+At line:1 char:1
++ dotnet ef migrations add 
+InitialMigration --project 
+src/infrastructur ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpe 
+   cified: (C:\Users\Franci...5 was  
+   resolved.:String) [], RemoteExc   
+ eption
+    + FullyQualifiedErrorId : Native 
+   CommandError
+ 
+C:\Users\Francisco C. Dev\source\repo
+s\TuColmadoRD\src\Presentations\TuCol
+madoRD.Presentation.API\TuColmadoRD.P
+resentation.API.csproj : warning 
+NU1608: Detected package version 
+outside of dependency constraint: Npg
+sql.EntityFrameworkCore.PostgreSQL 
+9.0.4 requires Microsoft.EntityFramew
+orkCore.Relational (>= 9.0.1 && < 
+10.0.0) but version Microsoft.EntityF
+rameworkCore.Relational 10.0.5 was 
+resolved.
+Build started...
+Build succeeded.
+The Entity Framework tools version '10.0.2' is older than that of the runtime '10.0.5'. Update the tools for the latest features and bug fixes. See https://aka.ms/AAc1fbw for more information.
+Unable to create a 'DbContext' of type 'TuColmadoDbContext'. The exception 'Method not found: 'System.String Microsoft.EntityFrameworkCore.Diagnostics.AbstractionsStrings.ArgumentIsEmpty(System.Object)'.' was thrown while attempting to create an instance. For the different patterns supported at design time, see https://go.microsoft.com/fwlink/?linkid=851728
