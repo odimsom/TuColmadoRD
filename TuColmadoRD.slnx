@@ -1,8 +1,12 @@
 <Solution>
   <Folder Name="/src/" />
   <Folder Name="/src/core/">
-    <Project Path="TuColmadoRD.Core.Domain/TuColmadoRD.Core.Domain.csproj" />
+    <Project Path="src/core/TuColmadoRD.Core.Domain/TuColmadoRD.Core.Domain.csproj" />
   </Folder>
-  <Folder Name="/src/infrastructure/" />
-  <Folder Name="/src/Presentations/" />
+  <Folder Name="/src/infrastructure/">
+    <Project Path="src/infrastructure/TuColmadoRD.Infrastructure.Persistence/TuColmadoRD.Infrastructure.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentations/">
+    <Project Path="src/Presentations/TuColmadoRD.Presentation.API/TuColmadoRD.Presentation.API.csproj" />
+  </Folder>
 </Solution>
