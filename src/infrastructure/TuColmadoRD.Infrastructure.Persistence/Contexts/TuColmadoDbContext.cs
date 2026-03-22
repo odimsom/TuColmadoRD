@@ -65,7 +65,6 @@ public class TuColmadoDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         
-        // This line applies all IEntityTypeConfigurations found in the current assembly.
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
