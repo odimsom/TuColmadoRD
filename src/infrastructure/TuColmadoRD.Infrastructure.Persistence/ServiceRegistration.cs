@@ -29,13 +29,20 @@ public static class ServiceRegistration
 {
     public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        #region Database Context Registration
         services.AddDbContext<TuColmadoDbContext>(options =>
             options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection") ?? throw new System.InvalidOperationException("Connection string 'DefaultConnection' not found."),
-                b => b.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)));
+                configuration.GetConnectionString("DefaultConnection")
+                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
+                    npgsqlOptions =>
+                    npgsqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
+            )
+        );
+        #endregion
 
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
+        #region Registration of repositories for each module
         // Audit
         services.AddScoped<IAuditTrailRepository, AuditTrailRepository>();
 
@@ -77,6 +84,7 @@ public static class ServiceRegistration
         services.AddScoped<ICashDrawerRepository, CashDrawerRepository>();
         services.AddScoped<IExpenseRepository, ExpenseRepository>();
         services.AddScoped<IPettyCashRepository, PettyCashRepository>();
+        #endregion
 
         return services;
     }

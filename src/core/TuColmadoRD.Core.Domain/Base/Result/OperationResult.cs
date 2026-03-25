@@ -26,12 +26,12 @@ namespace TuColmadoRD.Core.Domain.Base.Result
             _error = error;
         }
 
-        public static OperationResult<TResult, TError> Good(TResult result)
+        public static OperationResult<TResult, TError> Good(TResult? result)
         {
             return new OperationResult<TResult, TError>(true, result, default);
         }
 
-        public static OperationResult<TResult, TError> Bad(TError error)
+        public static OperationResult<TResult, TError> Bad(TError? error)
         {
             return new OperationResult<TResult, TError>(false, default, error);
         }

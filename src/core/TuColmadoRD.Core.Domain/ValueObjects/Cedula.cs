@@ -28,7 +28,6 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
         }
         private static string Sanitize(string? value)
             => Regex.Replace(value ?? "", @"[^0-9]", "");
-
         private static bool VerifyDigit(string cedula)
         {
             int vnTotal = 0;

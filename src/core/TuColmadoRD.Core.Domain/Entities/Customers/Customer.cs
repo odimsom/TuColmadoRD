@@ -6,7 +6,6 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
 {
     public class Customer : ITenantEntity
     {
-    private Customer() { }
         public Guid Id { get; private set; }
         public TenantIdentifier TenantId { get; private set; }
         public string FullName { get; private set; }
@@ -16,6 +15,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
         public bool IsActive { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
+        private Customer() { }
         public CustomerAccount Account { get; private set; }
 
         private Customer(TenantIdentifier tenantId, string fullName, Cedula documentId, Phone? phone, Address? address)
@@ -41,6 +41,8 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
         {
             if (string.IsNullOrWhiteSpace(fullName))
                 return OperationResult<Customer, string>.Bad("El nombre completo es obligatorio.");
+            if (fullName.Length > 100)
+                return OperationResult<Customer, string>.Bad("El nombre completo no puede exceder los 100 caracteres.");
 
             return OperationResult<Customer, string>.Good(new Customer(tenantId, fullName, documentId, phone, address));
         }

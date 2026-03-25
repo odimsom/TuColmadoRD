@@ -7,8 +7,8 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
         public string Province { get; private init; }
         public string Sector { get; private init; }
         public string Street { get; private init; }
+        public string Reference { get; private init; }
         public string? HouseNumber { get; private init; }
-        public string? Reference { get; private init; }
         private Address(string province, string sector, string street, string? houseNumber, string reference)
         {
             Province = province;
