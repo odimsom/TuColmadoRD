@@ -8,4 +8,4 @@ namespace TuColmadoRD.Infrastructure.Persistence.Repositories.Sales;
 public class SaleRepository(TuColmadoDbContext dbContext) : GenericRepository<Sale>(dbContext), ISaleRepository
 {
 }
-}
+

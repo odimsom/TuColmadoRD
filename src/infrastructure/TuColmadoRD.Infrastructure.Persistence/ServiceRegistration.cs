@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using TuColmadoRD.Core.Domain.Interfaces.Repositories.Base;
+using Microsoft.Extensions.Hosting;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Audit;
+using TuColmadoRD.Core.Domain.Interfaces.Repositories.Base;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Customers;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Fiscal;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.HumanResources;
@@ -12,8 +13,8 @@ using TuColmadoRD.Core.Domain.Interfaces.Repositories.Purchasing;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Sales;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Treasury;
 using TuColmadoRD.Infrastructure.Persistence.Contexts;
-using TuColmadoRD.Infrastructure.Persistence.Repositories.Base;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.Audit;
+using TuColmadoRD.Infrastructure.Persistence.Repositories.Base;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.Customers;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.Fiscal;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.HumanResources;
@@ -29,15 +30,38 @@ public static class ServiceRegistration
 {
     public static IServiceCollection AddPersistenceInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+
         #region Database Context Registration
-        services.AddDbContext<TuColmadoDbContext>(options =>
-            options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection")
-                ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found."),
-                    npgsqlOptions =>
-                    npgsqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
-            )
+        var environment = configuration["ASPNETCORE_ENVIRONMENT"]
+            ?? Environments.Production;
+
+        var isDevelopment = environment.Equals(
+            Environments.Development,
+            StringComparison.OrdinalIgnoreCase
         );
+
+        if (isDevelopment)
+        {
+            services.AddDbContext<TuColmadoDbContext>(options =>
+                options.UseSqlServer(
+                    configuration.GetConnectionString("SQLServerConnectionString")
+                    ?? throw new InvalidOperationException("Connection string 'SQLServerConnectionString' not found."),
+                    sqlOptions =>
+                        sqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
+                )
+            );
+        }
+        else
+        {
+            services.AddDbContext<TuColmadoDbContext>(options =>
+                options.UseNpgsql(
+                    configuration.GetConnectionString("PostgresSQLConnectionString")
+                    ?? throw new InvalidOperationException("Connection string 'PostgresSQLConnectionString' not found."),
+                    npgsqlOptions =>
+                        npgsqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
+                )
+            );
+        }
         #endregion
 
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));

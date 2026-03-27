@@ -2,8 +2,9 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TuColmadoRD.Infrastructure.Persistence.Contexts;
 
 #nullable disable
@@ -11,16 +12,18 @@ using TuColmadoRD.Infrastructure.Persistence.Contexts;
 namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(TuColmadoDbContext))]
-    partial class TuColmadoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260326012825_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "9.0.2")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Audit.AuditTrail", b =>
                 {
@@ -31,18 +34,18 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -53,13 +56,13 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("LastActivity")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -73,22 +76,22 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Concept")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("CustomerAccountId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -101,18 +104,18 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("IssuedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NCF")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -123,7 +126,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<long>("CurrentNumber")
                         .HasColumnType("bigint");
@@ -132,18 +135,18 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Prefix")
                         .IsRequired()
                         .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasColumnType("character varying(5)");
 
                     b.Property<int>("Type")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -154,19 +157,19 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -177,27 +180,27 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<DateTime>("HireDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Role")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -213,27 +216,27 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ColorHex")
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("Description")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("IconPath")
                         .HasMaxLength(250)
-                        .HasColumnType("nvarchar(250)");
+                        .HasColumnType("character varying(250)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -244,31 +247,31 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Barcode")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<Guid>("CategoryId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ImageUrl")
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("ShortName")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<int>("UnitType")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -279,21 +282,21 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<decimal>("Factor")
                         .HasColumnType("decimal(18,6)");
 
                     b.Property<string>("FromUnitId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ToUnitId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -309,20 +312,20 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Inventory.UnitOfMeasureEntity", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Abbreviation")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
                     b.Property<bool>("IsFractionable")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -333,23 +336,23 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DeliveredAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("DeliveryPersonId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("DispatchedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -362,22 +365,22 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsAvailable")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("VehiclePlate")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 
@@ -388,13 +391,13 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("PurchaseOrderId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -409,17 +412,17 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<Guid>("SupplierId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -432,19 +435,19 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BusinessName")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("character varying(150)");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -455,21 +458,21 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("CustomerId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("PaymentMethod")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -482,13 +485,13 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("SaleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -503,20 +506,20 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("CashierId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<DateTime?>("EndTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("StartTime")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -529,15 +532,15 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
 
@@ -548,13 +551,13 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<bool>("IsOpen")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("ShiftId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
@@ -567,26 +570,26 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("CashBoxId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasColumnType("character varying(500)");
 
                     b.Property<string>("ReferenceNumber")
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -599,12 +602,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
 
@@ -616,12 +619,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Phone", "ContactPhone", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("ContactPhone");
 
                             b1.HasKey("CustomerId");
@@ -635,12 +638,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Cedula", "DocumentId", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("DocumentId");
 
                             b1.HasKey("CustomerId");
@@ -654,35 +657,35 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Address", "HomeAddress", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("HouseNumber")
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("Address_HouseNumber");
 
                             b1.Property<string>("Province")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("Address_Province");
 
                             b1.Property<string>("Reference")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
+                                .HasColumnType("character varying(200)")
                                 .HasColumnName("Address_Reference");
 
                             b1.Property<string>("Sector")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("Address_Sector");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("Address_Street");
 
                             b1.HasKey("CustomerId");
@@ -696,10 +699,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("CustomerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("CustomerId");
@@ -732,7 +735,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "Balance", b1 =>
                         {
                             b1.Property<Guid>("CustomerAccountId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -749,7 +752,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "CreditLimit", b1 =>
                         {
                             b1.Property<Guid>("CustomerAccountId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -766,10 +769,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("CustomerAccountId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("CustomerAccountId");
@@ -801,7 +804,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "Amount", b1 =>
                         {
                             b1.Property<Guid>("DebtTransactionId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -818,10 +821,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("DebtTransactionId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("DebtTransactionId");
@@ -844,12 +847,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Rnc", "BuyerRnc", b1 =>
                         {
                             b1.Property<Guid>("FiscalReceiptId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)")
+                                .HasColumnType("character varying(15)")
                                 .HasColumnName("BuyerRnc");
 
                             b1.HasKey("FiscalReceiptId");
@@ -863,10 +866,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("FiscalReceiptId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("FiscalReceiptId");
@@ -880,7 +883,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TotalTaxed", b1 =>
                         {
                             b1.Property<Guid>("FiscalReceiptId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -908,10 +911,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("FiscalSequenceId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("FiscalSequenceId");
@@ -931,12 +934,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TaxRate", "Rate", b1 =>
                         {
                             b1.Property<Guid>("TaxId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("RateName");
 
                             b1.Property<decimal>("Percentage")
@@ -954,10 +957,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("TaxId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("TaxId");
@@ -980,12 +983,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Cedula", "IdCard", b1 =>
                         {
                             b1.Property<Guid>("EmployeeId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("IdCard");
 
                             b1.HasKey("EmployeeId");
@@ -999,12 +1002,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Phone", "Phone", b1 =>
                         {
                             b1.Property<Guid>("EmployeeId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("Phone");
 
                             b1.HasKey("EmployeeId");
@@ -1018,10 +1021,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("EmployeeId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("EmployeeId");
@@ -1045,10 +1048,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("CategoryId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("CategoryId");
@@ -1068,7 +1071,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "CostPrice", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1085,12 +1088,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TaxRate", "IscRate", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("IscName");
 
                             b1.Property<decimal>("Percentage")
@@ -1108,12 +1111,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TaxRate", "ItbisRate", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("ItbisName");
 
                             b1.Property<decimal>("Percentage")
@@ -1131,16 +1134,16 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Quantity", "MinStock", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Type")
-                                .HasColumnType("int")
+                                .HasColumnType("integer")
                                 .HasColumnName("MinStockUnitType");
 
                             b1.Property<string>("UnitLabel")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("MinStockUnitLabel");
 
                             b1.Property<decimal>("Value")
@@ -1158,7 +1161,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "SalePrice", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1175,16 +1178,16 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Quantity", "StockQuantity", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Type")
-                                .HasColumnType("int")
+                                .HasColumnType("integer")
                                 .HasColumnName("StockUnitType");
 
                             b1.Property<string>("UnitLabel")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("StockUnitLabel");
 
                             b1.Property<decimal>("Value")
@@ -1202,10 +1205,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("ProductId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("ProductId");
@@ -1260,10 +1263,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("UnitConversionId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("UnitConversionId");
@@ -1293,35 +1296,35 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Address", "Destination", b1 =>
                         {
                             b1.Property<Guid>("DeliveryOrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("HouseNumber")
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("Destination_HouseNumber");
 
                             b1.Property<string>("Province")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("Destination_Province");
 
                             b1.Property<string>("Reference")
                                 .IsRequired()
                                 .HasMaxLength(200)
-                                .HasColumnType("nvarchar(200)")
+                                .HasColumnType("character varying(200)")
                                 .HasColumnName("Destination_Reference");
 
                             b1.Property<string>("Sector")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("Destination_Sector");
 
                             b1.Property<string>("Street")
                                 .IsRequired()
                                 .HasMaxLength(100)
-                                .HasColumnType("nvarchar(100)")
+                                .HasColumnType("character varying(100)")
                                 .HasColumnName("Destination_Street");
 
                             b1.HasKey("DeliveryOrderId");
@@ -1335,10 +1338,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("DeliveryOrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("DeliveryOrderId");
@@ -1361,12 +1364,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Phone", "ContactPhone", b1 =>
                         {
                             b1.Property<Guid>("DeliveryPersonId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("ContactPhone");
 
                             b1.HasKey("DeliveryPersonId");
@@ -1380,10 +1383,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("DeliveryPersonId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("DeliveryPersonId");
@@ -1417,16 +1420,16 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Quantity", "Quantity", b1 =>
                         {
                             b1.Property<Guid>("PurchaseDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Type")
-                                .HasColumnType("int")
+                                .HasColumnType("integer")
                                 .HasColumnName("UnitType");
 
                             b1.Property<string>("UnitLabel")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("UnitLabel");
 
                             b1.Property<decimal>("Value")
@@ -1444,7 +1447,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "SubTotal", b1 =>
                         {
                             b1.Property<Guid>("PurchaseDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1461,7 +1464,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "UnitCost", b1 =>
                         {
                             b1.Property<Guid>("PurchaseDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1496,10 +1499,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("PurchaseOrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("PurchaseOrderId");
@@ -1513,7 +1516,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TotalAmount", b1 =>
                         {
                             b1.Property<Guid>("PurchaseOrderId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1539,12 +1542,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Phone", "ContactPhone", b1 =>
                         {
                             b1.Property<Guid>("SupplierId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("ContactPhone");
 
                             b1.HasKey("SupplierId");
@@ -1558,12 +1561,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Rnc", "TaxId", b1 =>
                         {
                             b1.Property<Guid>("SupplierId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<string>("Value")
                                 .IsRequired()
                                 .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)")
+                                .HasColumnType("character varying(15)")
                                 .HasColumnName("TaxId");
 
                             b1.HasKey("SupplierId");
@@ -1577,10 +1580,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("SupplierId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("SupplierId");
@@ -1610,7 +1613,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "SubTotal", b1 =>
                         {
                             b1.Property<Guid>("SaleId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1627,7 +1630,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TaxTotal", b1 =>
                         {
                             b1.Property<Guid>("SaleId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1644,10 +1647,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("SaleId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("SaleId");
@@ -1661,7 +1664,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "Total", b1 =>
                         {
                             b1.Property<Guid>("SaleId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1705,16 +1708,16 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Quantity", "Quantity", b1 =>
                         {
                             b1.Property<Guid>("SaleDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<int>("Type")
-                                .HasColumnType("int")
+                                .HasColumnType("integer")
                                 .HasColumnName("UnitType");
 
                             b1.Property<string>("UnitLabel")
                                 .IsRequired()
                                 .HasMaxLength(20)
-                                .HasColumnType("nvarchar(20)")
+                                .HasColumnType("character varying(20)")
                                 .HasColumnName("UnitLabel");
 
                             b1.Property<decimal>("Value")
@@ -1732,7 +1735,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "SubTotal", b1 =>
                         {
                             b1.Property<Guid>("SaleDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1749,7 +1752,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TaxAmount", b1 =>
                         {
                             b1.Property<Guid>("SaleDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1766,7 +1769,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "UnitPrice", b1 =>
                         {
                             b1.Property<Guid>("SaleDetailId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1804,7 +1807,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "ActualCashAtClose", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1821,7 +1824,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "InitialCash", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1838,10 +1841,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("ShiftId");
@@ -1855,7 +1858,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TotalCardSales", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1872,7 +1875,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TotalCashSales", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1889,7 +1892,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TotalCreditSales", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1906,7 +1909,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "TotalTransferSales", b1 =>
                         {
                             b1.Property<Guid>("ShiftId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1946,7 +1949,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "Balance", b1 =>
                         {
                             b1.Property<Guid>("CashBoxId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -1963,10 +1966,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("CashBoxId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("CashBoxId");
@@ -1995,7 +1998,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "CurrentBalance", b1 =>
                         {
                             b1.Property<Guid>("CashDrawerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -2012,7 +2015,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "OpeningBalance", b1 =>
                         {
                             b1.Property<Guid>("CashDrawerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -2029,10 +2032,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("CashDrawerId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("CashDrawerId");
@@ -2064,7 +2067,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "Amount", b1 =>
                         {
                             b1.Property<Guid>("ExpenseId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -2081,10 +2084,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("ExpenseId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("ExpenseId");
@@ -2107,7 +2110,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "Balance", b1 =>
                         {
                             b1.Property<Guid>("PettyCashId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -2124,7 +2127,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.Money", "MaxLimit", b1 =>
                         {
                             b1.Property<Guid>("PettyCashId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<decimal>("Amount")
                                 .HasColumnType("decimal(18,2)")
@@ -2141,10 +2144,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
                         {
                             b1.Property<Guid>("PettyCashId")
-                                .HasColumnType("uniqueidentifier");
+                                .HasColumnType("uuid");
 
                             b1.Property<Guid>("Value")
-                                .HasColumnType("uniqueidentifier")
+                                .HasColumnType("uuid")
                                 .HasColumnName("TenantId");
 
                             b1.HasKey("PettyCashId");

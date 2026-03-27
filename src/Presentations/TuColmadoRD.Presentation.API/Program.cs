@@ -1,4 +1,5 @@
 using TuColmadoRD.Infrastructure.Persistence;
+using TuColmadoRD.Infrastructure.CrossCutting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -6,8 +7,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register Persistence
 builder.Services.AddPersistenceInfrastructure(builder.Configuration);
+builder.Services.AddCrossCuttingInfrastructure(builder.Configuration);
+
 
 var app = builder.Build();
 

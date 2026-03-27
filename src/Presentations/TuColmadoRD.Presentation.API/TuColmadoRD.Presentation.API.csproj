@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\infrastructure\TuColmadoRD.Infrastructure.Persistence\TuColmadoRD.Infrastructure.Persistence.csproj" />
+    <ProjectReference Include="..\..\..\TuColmadoRD.Infrastructure.CrossCutting\TuColmadoRD.Infrastructure.CrossCutting.csproj" />
     <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
   </ItemGroup>
 
