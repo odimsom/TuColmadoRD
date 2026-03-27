@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\src\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
-    <ProjectReference Include="..\src\infrastructure\TuColmadoRD.Infrastructure.Persistence\TuColmadoRD.Infrastructure.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
