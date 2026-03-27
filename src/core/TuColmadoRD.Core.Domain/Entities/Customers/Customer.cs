@@ -41,8 +41,8 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
         {
             if (string.IsNullOrWhiteSpace(fullName))
                 return OperationResult<Customer, string>.Bad("El nombre completo es obligatorio.");
-            if (fullName.Length > 100)
-                return OperationResult<Customer, string>.Bad("El nombre completo no puede exceder los 100 caracteres.");
+            if (fullName.Length > 200)
+                return OperationResult<Customer, string>.Bad("El nombre completo no puede exceder los 200 caracteres.");
 
             return OperationResult<Customer, string>.Good(new Customer(tenantId, fullName, documentId, phone, address));
         }
