@@ -197,8 +197,6 @@ public sealed class ConnectionMonitor : IConnectionMonitor
         try
         {
             using var ping = new Ping();
-            using var timeoutCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            timeoutCts.CancelAfter(_options.PingTimeout);
 
             var reply = await ping.SendPingAsync(
                 host,
