@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\TuColmadoRD.Infrastructure.CrossCutting\TuColmadoRD.Infrastructure.CrossCutting.csproj" />
+    <ProjectReference Include="..\..\..\TuColmadoRD.Infrastructure.Persistence\TuColmadoRD.Infrastructure.Persistence.csproj" />
     <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
   </ItemGroup>
 
