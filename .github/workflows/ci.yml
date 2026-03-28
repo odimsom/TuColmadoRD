@@ -43,3 +43,21 @@ jobs:
         run: |
           gh pr create --base master --head ${{ github.head_ref }} --title "Auto-merge from QA pipeline" --body "" || echo "PR already exists"
           gh pr merge ${{ github.head_ref }} --auto --merge || echo "Could not auto-merge"
+
+  deploy_to_server:
+    needs: [test, integrate_to_master]
+    if: always() && (github.ref == 'refs/heads/master' || github.event.pull_request.merged == true)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via Dokploy Webhook or SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: server.synsetsolutions.com
+          username: synset_server
+          port: 2222
+          password: "1011"
+          script: |
+            echo "Conectado al servidor exitosamente"
+            # Si usas docker-compose manual:
+            # cd ~/TuColmadoRD && git pull origin master && docker compose up -d --build
+            # NOTA: Si usas Dokploy, Dokploy escucha a Github y auto-despliega de forma nativa sin requerir acción SSH.
