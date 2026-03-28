@@ -1,7 +1,0 @@
-C:\Users\Francisco C. Dev\source\repos\TuColmadoRD\TuColmadoRD.Core.Domain\Entities\Inventory\UnitOfMeasureEntity.cs(7,13): error CS8862: A constructor declared in a type with parameter list must have 'this' constructor initializer. [C:\Users\Francisco C. Dev\source\repos\TuColmadoRD\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj]
-
-Build FAILED.
-    69 Warning(s)
-    1 Error(s)
-
-Time Elapsed 00:00:02.22

@@ -7,6 +7,7 @@
   <Folder Name="/src/infrastructure/">
     <Project Path="src/infrastructure/TuColmadoRD.Infrastructure.Persistence/TuColmadoRD.Infrastructure.Persistence.csproj" />
     <Project Path="TuColmadoRD.Infrastructure.CrossCutting/TuColmadoRD.Infrastructure.CrossCutting.csproj" Id="c743c1de-3407-4104-80ca-64189391a857" />
+    <Project Path="TuColmadoRD.Infrastructure.IOC/TuColmadoRD.Infrastructure.IOC.csproj" Id="fec6e1f7-e3eb-4407-bfa4-325dce069bb0" />
   </Folder>
   <Folder Name="/src/Presentations/">
     <Project Path="src/Presentations/TuColmadoRD.Presentation.API/TuColmadoRD.Presentation.API.csproj" />

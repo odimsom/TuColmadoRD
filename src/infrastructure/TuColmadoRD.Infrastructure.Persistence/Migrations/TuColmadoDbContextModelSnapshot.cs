@@ -24,7 +24,34 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Audit.AuditTrail", b =>
                 {
-                    b.ToTable("AuditTrails", (string)null);
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("NewValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OldValues")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TableName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditTrails", "Audit");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Customers.Customer", b =>
@@ -46,7 +73,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Customers", (string)null);
+                    b.ToTable("Customers", "Customers");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Customers.CustomerAccount", b =>
@@ -66,7 +93,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.HasIndex("CustomerId")
                         .IsUnique();
 
-                    b.ToTable("CustomerAccounts", (string)null);
+                    b.ToTable("CustomerAccounts", "Customers");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Customers.DebtTransaction", b =>
@@ -94,7 +121,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CustomerAccountId");
 
-                    b.ToTable("DebtTransactions", (string)null);
+                    b.ToTable("DebtTransactions", "Customers");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Fiscal.FiscalReceipt", b =>
@@ -116,7 +143,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FiscalReceipts", (string)null);
+                    b.ToTable("FiscalReceipts", "Fiscal");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Fiscal.FiscalSequence", b =>
@@ -147,7 +174,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FiscalSequences", (string)null);
+                    b.ToTable("FiscalSequences", "Fiscal");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Fiscal.Tax", b =>
@@ -170,7 +197,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Taxes", (string)null);
+                    b.ToTable("Taxes", "Fiscal");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.HumanResources.Employee", b =>
@@ -201,12 +228,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Employees", "HumanResources");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.HumanResources.WorkShift", b =>
                 {
-                    b.ToTable("WorkShifts", (string)null);
+                    b.ToTable("WorkShifts", "HumanResources");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Inventory.Category", b =>
@@ -237,7 +264,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories", "Inventory");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Inventory.Product", b =>
@@ -272,7 +299,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products", "Inventory");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Inventory.UnitConversion", b =>
@@ -303,7 +330,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ToUnitId");
 
-                    b.ToTable("UnitConversions", (string)null);
+                    b.ToTable("UnitConversions", "Inventory");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Inventory.UnitOfMeasureEntity", b =>
@@ -326,7 +353,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UnitOfMeasures", (string)null);
+                    b.ToTable("UnitOfMeasures", "Inventory");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Logistics.DeliveryOrder", b =>
@@ -355,7 +382,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("DeliveryPersonId");
 
-                    b.ToTable("DeliveryOrders", (string)null);
+                    b.ToTable("DeliveryOrders", "Logistics");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Logistics.DeliveryPerson", b =>
@@ -381,7 +408,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DeliveryPersons", (string)null);
+                    b.ToTable("DeliveryPersons", "Logistics");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Purchasing.PurchaseDetail", b =>
@@ -402,7 +429,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("PurchaseOrderId");
 
-                    b.ToTable("PurchaseDetails", (string)null);
+                    b.ToTable("PurchaseDetails", "Purchasing");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Purchasing.PurchaseOrder", b =>
@@ -425,7 +452,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("PurchaseOrders", (string)null);
+                    b.ToTable("PurchaseOrders", "Purchasing");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Purchasing.Supplier", b =>
@@ -448,7 +475,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers", "Purchasing");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Sales.Sale", b =>
@@ -475,7 +502,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CustomerId");
 
-                    b.ToTable("Sales", (string)null);
+                    b.ToTable("Sales", "Sales");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Sales.SaleDetail", b =>
@@ -496,7 +523,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("SaleId");
 
-                    b.ToTable("SaleDetails", (string)null);
+                    b.ToTable("SaleDetails", "Sales");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Sales.Shift", b =>
@@ -522,7 +549,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CashierId");
 
-                    b.ToTable("Shifts", (string)null);
+                    b.ToTable("Shifts", "Sales");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Treasury.CashBox", b =>
@@ -541,7 +568,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CashBoxes", (string)null);
+                    b.ToTable("CashBoxes", "Treasury");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Treasury.CashDrawer", b =>
@@ -560,7 +587,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ShiftId");
 
-                    b.ToTable("CashDrawers", (string)null);
+                    b.ToTable("CashDrawers", "Treasury");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Treasury.Expense", b =>
@@ -592,7 +619,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("CashBoxId");
 
-                    b.ToTable("Expenses", (string)null);
+                    b.ToTable("Expenses", "Treasury");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Treasury.PettyCash", b =>
@@ -608,7 +635,30 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("PettyCashes", (string)null);
+                    b.ToTable("PettyCashes", "Treasury");
+                });
+
+            modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Audit.AuditTrail", b =>
+                {
+                    b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
+                        {
+                            b1.Property<Guid>("AuditTrailId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("Value")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("TenantId");
+
+                            b1.HasKey("AuditTrailId");
+
+                            b1.ToTable("AuditTrails", "Audit");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AuditTrailId");
+                        });
+
+                    b.Navigation("TenantId")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Customers.Customer", b =>
@@ -626,7 +676,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers");
+                            b1.ToTable("Customers", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -645,7 +695,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers");
+                            b1.ToTable("Customers", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -687,7 +737,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers");
+                            b1.ToTable("Customers", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -704,7 +754,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerId");
 
-                            b1.ToTable("Customers");
+                            b1.ToTable("Customers", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerId");
@@ -740,7 +790,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerAccountId");
 
-                            b1.ToTable("CustomerAccounts");
+                            b1.ToTable("CustomerAccounts", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerAccountId");
@@ -757,7 +807,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerAccountId");
 
-                            b1.ToTable("CustomerAccounts");
+                            b1.ToTable("CustomerAccounts", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerAccountId");
@@ -774,7 +824,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CustomerAccountId");
 
-                            b1.ToTable("CustomerAccounts");
+                            b1.ToTable("CustomerAccounts", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("CustomerAccountId");
@@ -809,7 +859,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("DebtTransactionId");
 
-                            b1.ToTable("DebtTransactions");
+                            b1.ToTable("DebtTransactions", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("DebtTransactionId");
@@ -826,7 +876,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("DebtTransactionId");
 
-                            b1.ToTable("DebtTransactions");
+                            b1.ToTable("DebtTransactions", "Customers");
 
                             b1.WithOwner()
                                 .HasForeignKey("DebtTransactionId");
@@ -854,7 +904,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("FiscalReceiptId");
 
-                            b1.ToTable("FiscalReceipts");
+                            b1.ToTable("FiscalReceipts", "Fiscal");
 
                             b1.WithOwner()
                                 .HasForeignKey("FiscalReceiptId");
@@ -871,7 +921,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("FiscalReceiptId");
 
-                            b1.ToTable("FiscalReceipts");
+                            b1.ToTable("FiscalReceipts", "Fiscal");
 
                             b1.WithOwner()
                                 .HasForeignKey("FiscalReceiptId");
@@ -888,7 +938,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("FiscalReceiptId");
 
-                            b1.ToTable("FiscalReceipts");
+                            b1.ToTable("FiscalReceipts", "Fiscal");
 
                             b1.WithOwner()
                                 .HasForeignKey("FiscalReceiptId");
@@ -916,7 +966,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("FiscalSequenceId");
 
-                            b1.ToTable("FiscalSequences");
+                            b1.ToTable("FiscalSequences", "Fiscal");
 
                             b1.WithOwner()
                                 .HasForeignKey("FiscalSequenceId");
@@ -945,7 +995,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("TaxId");
 
-                            b1.ToTable("Taxes");
+                            b1.ToTable("Taxes", "Fiscal");
 
                             b1.WithOwner()
                                 .HasForeignKey("TaxId");
@@ -962,7 +1012,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("TaxId");
 
-                            b1.ToTable("Taxes");
+                            b1.ToTable("Taxes", "Fiscal");
 
                             b1.WithOwner()
                                 .HasForeignKey("TaxId");
@@ -990,7 +1040,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("EmployeeId");
 
-                            b1.ToTable("Employees");
+                            b1.ToTable("Employees", "HumanResources");
 
                             b1.WithOwner()
                                 .HasForeignKey("EmployeeId");
@@ -1009,7 +1059,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("EmployeeId");
 
-                            b1.ToTable("Employees");
+                            b1.ToTable("Employees", "HumanResources");
 
                             b1.WithOwner()
                                 .HasForeignKey("EmployeeId");
@@ -1026,7 +1076,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("EmployeeId");
 
-                            b1.ToTable("Employees");
+                            b1.ToTable("Employees", "HumanResources");
 
                             b1.WithOwner()
                                 .HasForeignKey("EmployeeId");
@@ -1053,7 +1103,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CategoryId");
 
-                            b1.ToTable("Categories");
+                            b1.ToTable("Categories", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("CategoryId");
@@ -1076,7 +1126,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1099,7 +1149,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1122,7 +1172,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1149,7 +1199,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1166,7 +1216,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1193,7 +1243,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1210,7 +1260,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -1268,7 +1318,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("UnitConversionId");
 
-                            b1.ToTable("UnitConversions");
+                            b1.ToTable("UnitConversions", "Inventory");
 
                             b1.WithOwner()
                                 .HasForeignKey("UnitConversionId");
@@ -1326,7 +1376,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("DeliveryOrderId");
 
-                            b1.ToTable("DeliveryOrders");
+                            b1.ToTable("DeliveryOrders", "Logistics");
 
                             b1.WithOwner()
                                 .HasForeignKey("DeliveryOrderId");
@@ -1343,7 +1393,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("DeliveryOrderId");
 
-                            b1.ToTable("DeliveryOrders");
+                            b1.ToTable("DeliveryOrders", "Logistics");
 
                             b1.WithOwner()
                                 .HasForeignKey("DeliveryOrderId");
@@ -1371,7 +1421,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("DeliveryPersonId");
 
-                            b1.ToTable("DeliveryPersons");
+                            b1.ToTable("DeliveryPersons", "Logistics");
 
                             b1.WithOwner()
                                 .HasForeignKey("DeliveryPersonId");
@@ -1388,7 +1438,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("DeliveryPersonId");
 
-                            b1.ToTable("DeliveryPersons");
+                            b1.ToTable("DeliveryPersons", "Logistics");
 
                             b1.WithOwner()
                                 .HasForeignKey("DeliveryPersonId");
@@ -1435,7 +1485,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PurchaseDetailId");
 
-                            b1.ToTable("PurchaseDetails");
+                            b1.ToTable("PurchaseDetails", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("PurchaseDetailId");
@@ -1452,7 +1502,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PurchaseDetailId");
 
-                            b1.ToTable("PurchaseDetails");
+                            b1.ToTable("PurchaseDetails", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("PurchaseDetailId");
@@ -1469,7 +1519,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PurchaseDetailId");
 
-                            b1.ToTable("PurchaseDetails");
+                            b1.ToTable("PurchaseDetails", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("PurchaseDetailId");
@@ -1504,7 +1554,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PurchaseOrderId");
 
-                            b1.ToTable("PurchaseOrders");
+                            b1.ToTable("PurchaseOrders", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("PurchaseOrderId");
@@ -1521,7 +1571,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PurchaseOrderId");
 
-                            b1.ToTable("PurchaseOrders");
+                            b1.ToTable("PurchaseOrders", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("PurchaseOrderId");
@@ -1549,7 +1599,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SupplierId");
 
-                            b1.ToTable("Suppliers");
+                            b1.ToTable("Suppliers", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierId");
@@ -1568,7 +1618,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SupplierId");
 
-                            b1.ToTable("Suppliers");
+                            b1.ToTable("Suppliers", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierId");
@@ -1585,7 +1635,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SupplierId");
 
-                            b1.ToTable("Suppliers");
+                            b1.ToTable("Suppliers", "Purchasing");
 
                             b1.WithOwner()
                                 .HasForeignKey("SupplierId");
@@ -1618,7 +1668,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleId");
 
-                            b1.ToTable("Sales");
+                            b1.ToTable("Sales", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleId");
@@ -1635,7 +1685,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleId");
 
-                            b1.ToTable("Sales");
+                            b1.ToTable("Sales", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleId");
@@ -1652,7 +1702,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleId");
 
-                            b1.ToTable("Sales");
+                            b1.ToTable("Sales", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleId");
@@ -1669,7 +1719,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleId");
 
-                            b1.ToTable("Sales");
+                            b1.ToTable("Sales", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleId");
@@ -1723,7 +1773,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleDetailId");
 
-                            b1.ToTable("SaleDetails");
+                            b1.ToTable("SaleDetails", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleDetailId");
@@ -1740,7 +1790,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleDetailId");
 
-                            b1.ToTable("SaleDetails");
+                            b1.ToTable("SaleDetails", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleDetailId");
@@ -1757,7 +1807,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleDetailId");
 
-                            b1.ToTable("SaleDetails");
+                            b1.ToTable("SaleDetails", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleDetailId");
@@ -1774,7 +1824,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("SaleDetailId");
 
-                            b1.ToTable("SaleDetails");
+                            b1.ToTable("SaleDetails", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("SaleDetailId");
@@ -1812,7 +1862,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1829,7 +1879,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1846,7 +1896,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1863,7 +1913,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1880,7 +1930,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1897,7 +1947,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1914,7 +1964,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ShiftId");
 
-                            b1.ToTable("Shifts");
+                            b1.ToTable("Shifts", "Sales");
 
                             b1.WithOwner()
                                 .HasForeignKey("ShiftId");
@@ -1954,7 +2004,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CashBoxId");
 
-                            b1.ToTable("CashBoxes");
+                            b1.ToTable("CashBoxes", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("CashBoxId");
@@ -1971,7 +2021,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CashBoxId");
 
-                            b1.ToTable("CashBoxes");
+                            b1.ToTable("CashBoxes", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("CashBoxId");
@@ -2003,7 +2053,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CashDrawerId");
 
-                            b1.ToTable("CashDrawers");
+                            b1.ToTable("CashDrawers", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("CashDrawerId");
@@ -2020,7 +2070,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CashDrawerId");
 
-                            b1.ToTable("CashDrawers");
+                            b1.ToTable("CashDrawers", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("CashDrawerId");
@@ -2037,7 +2087,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("CashDrawerId");
 
-                            b1.ToTable("CashDrawers");
+                            b1.ToTable("CashDrawers", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("CashDrawerId");
@@ -2072,7 +2122,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ExpenseId");
 
-                            b1.ToTable("Expenses");
+                            b1.ToTable("Expenses", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("ExpenseId");
@@ -2089,7 +2139,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("ExpenseId");
 
-                            b1.ToTable("Expenses");
+                            b1.ToTable("Expenses", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("ExpenseId");
@@ -2115,7 +2165,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PettyCashId");
 
-                            b1.ToTable("PettyCashes");
+                            b1.ToTable("PettyCashes", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("PettyCashId");
@@ -2132,7 +2182,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PettyCashId");
 
-                            b1.ToTable("PettyCashes");
+                            b1.ToTable("PettyCashes", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("PettyCashId");
@@ -2149,7 +2199,7 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
                             b1.HasKey("PettyCashId");
 
-                            b1.ToTable("PettyCashes");
+                            b1.ToTable("PettyCashes", "Treasury");
 
                             b1.WithOwner()
                                 .HasForeignKey("PettyCashId");

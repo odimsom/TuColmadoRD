@@ -20,8 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\TuColmadoRD.Infrastructure.CrossCutting\TuColmadoRD.Infrastructure.CrossCutting.csproj" />
-    <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
+    <ProjectReference Include="..\..\..\TuColmadoRD.Infrastructure.IOC\TuColmadoRD.Infrastructure.IOC.csproj" />
   </ItemGroup>
 
 </Project>
