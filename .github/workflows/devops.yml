@@ -31,7 +31,7 @@ jobs:
 
   integrate_to_qa:
     needs: test
-    if: github.event.pull_request.merged == true && github.base_ref == 'Develop'
+    if: always() && !failure() && !cancelled() && github.event.pull_request.merged == true && github.base_ref == 'Develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -46,8 +46,8 @@ jobs:
           gh pr merge Develop --auto --merge || true
 
   integrate_to_master:
-    needs: test
-    if: github.event.pull_request.merged == true && github.base_ref == 'QA'
+    needs: integrate_to_qa
+    if: always() && !failure() && !cancelled() && github.event.pull_request.merged == true && github.base_ref == 'QA'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
@@ -62,11 +62,11 @@ jobs:
           gh pr merge QA --auto --merge || true
 
   deploy_to_server:
-    needs: test
-    if: github.event.pull_request.merged == true && github.base_ref == 'master'
+    needs: integrate_to_master
+    if: always() && !failure() && !cancelled() && (github.event.pull_request.merged == true || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via Dokploy Webhook or SSH
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: server.synsetsolutions.com
@@ -75,4 +75,12 @@ jobs:
           password: "1011"
           script: |
             echo "Conectado al servidor exitosamente. Deploy automático en curso."
-            # cd ~/TuColmadoRD && git pull origin master && docker compose up -d --build
+            if [ -d ~/TuColmadoRD ]; then
+              cd ~/TuColmadoRD
+              git pull origin master
+              docker compose up -d --build
+            else
+              git clone https://github.com/ODIMSOM/TuColmadoRD ~/TuColmadoRD
+              cd ~/TuColmadoRD
+              docker compose up -d --build
+            fi
