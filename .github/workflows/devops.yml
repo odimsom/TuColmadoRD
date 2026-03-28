@@ -3,8 +3,10 @@ name: CI/CD Pipeline
 on:
   pull_request:
     branches:
+      - Develop
       - QA
       - master
+    types: [opened, synchronize, closed]
 
 jobs:
   test:
@@ -27,26 +29,41 @@ jobs:
       - name: Test
         run: dotnet test TuColmadoRD.slnx --no-build --verbosity normal
 
-  integrate_to_master:
+  integrate_to_qa:
     needs: test
-    if: github.event_name == 'pull_request' && github.base_ref == 'QA' && github.event.pull_request.merged == false
+    if: github.event.pull_request.merged == true && github.base_ref == 'Develop'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Set up GitHub CLI
+      - name: Auto-propagate to QA
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh pr create --base master --head ${{ github.head_ref }} --title "Auto-merge from QA pipeline" --body "" || echo "PR already exists"
-          gh pr merge ${{ github.head_ref }} --auto --merge || echo "Could not auto-merge"
+          gh pr create --base QA --head Develop --title "Auto-merge Develop to QA" --body "Automated promotion" || true
+          gh pr merge Develop --auto --merge || true
+
+  integrate_to_master:
+    needs: test
+    if: github.event.pull_request.merged == true && github.base_ref == 'QA'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Auto-propagate to Master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base master --head QA --title "Auto-merge QA to Master" --body "Automated promotion" || true
+          gh pr merge QA --auto --merge || true
 
   deploy_to_server:
-    needs: [test, integrate_to_master]
-    if: always() && (github.ref == 'refs/heads/master' || github.event.pull_request.merged == true)
+    needs: test
+    if: github.event.pull_request.merged == true && github.base_ref == 'master'
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via Dokploy Webhook or SSH
@@ -57,7 +74,5 @@ jobs:
           port: 2222
           password: "1011"
           script: |
-            echo "Conectado al servidor exitosamente"
-            # Si usas docker-compose manual:
+            echo "Conectado al servidor exitosamente. Deploy automático en curso."
             # cd ~/TuColmadoRD && git pull origin master && docker compose up -d --build
-            # NOTA: Si usas Dokploy, Dokploy escucha a Github y auto-despliega de forma nativa sin requerir acción SSH.
