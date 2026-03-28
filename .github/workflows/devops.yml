@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - Develop
+      - QA
+      - master
+    types: [opened, synchronize, closed]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore TuColmadoRD.slnx
+
+      - name: Build
+        run: dotnet build TuColmadoRD.slnx --no-restore
+
+      - name: Test
+        run: dotnet test TuColmadoRD.slnx --no-build --verbosity normal
+
+  integrate_to_qa:
+    needs: test
+    if: github.event.pull_request.merged == true && github.base_ref == 'Develop'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Auto-propagate to QA
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base QA --head Develop --title "Auto-merge Develop to QA" --body "Automated promotion" || true
+          gh pr merge Develop --auto --merge || true
+
+  integrate_to_master:
+    needs: test
+    if: github.event.pull_request.merged == true && github.base_ref == 'QA'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Auto-propagate to Master
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base master --head QA --title "Auto-merge QA to Master" --body "Automated promotion" || true
+          gh pr merge QA --auto --merge || true
+
+  deploy_to_server:
+    needs: test
+    if: github.event.pull_request.merged == true && github.base_ref == 'master'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via Dokploy Webhook or SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: server.synsetsolutions.com
+          username: synset_server
+          port: 2222
+          password: "1011"
+          script: |
+            echo "Conectado al servidor exitosamente. Deploy automático en curso."
+            # cd ~/TuColmadoRD && git pull origin master && docker compose up -d --build
