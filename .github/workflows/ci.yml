@@ -1,0 +1,45 @@
+name: CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - QA
+      - master
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore TuColmadoRD.slnx
+
+      - name: Build
+        run: dotnet build TuColmadoRD.slnx --no-restore
+
+      - name: Test
+        run: dotnet test TuColmadoRD.slnx --no-build --verbosity normal
+
+  integrate_to_master:
+    needs: test
+    if: github.event_name == 'pull_request' && github.base_ref == 'QA' && github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base master --head ${{ github.head_ref }} --title "Auto-merge from QA pipeline" --body "" || echo "PR already exists"
+          gh pr merge ${{ github.head_ref }} --auto --merge || echo "Could not auto-merge"
