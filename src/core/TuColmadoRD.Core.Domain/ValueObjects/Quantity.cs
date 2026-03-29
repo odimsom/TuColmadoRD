@@ -18,8 +18,8 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
 
         public static OperationResult<Quantity, string> Create(decimal value, string unitLabel, UnitType type)
         {
-            if (value <= 0)
-                return OperationResult<Quantity, string>.Bad("La cantidad debe ser mayor a cero.");
+            if (value < 0)
+                return OperationResult<Quantity, string>.Bad("La cantidad no puede ser negativa.");
 
             if (type == UnitType.Unitary && value % 1 != 0)
             {
