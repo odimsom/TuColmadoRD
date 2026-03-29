@@ -1,6 +1,7 @@
 using TuColmadoRD.Infrastructure.CrossCutting.Security;
 using TuColmadoRD.Infrastructure.IOC.ServiceRegistrations;
 using TuColmadoRD.Presentation.API.Endpoints.Inventory;
+using TuColmadoRD.Presentation.API.Endpoints.Sales.Shifts;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,5 +27,6 @@ app.UseHttpsRedirection();
 app.UseMiddleware<SubscriptionGuardMiddleware>();
 
 app.MapInventoryEndpoints();
+app.MapShiftEndpoints();
 
 app.Run();
