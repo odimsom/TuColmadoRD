@@ -45,25 +45,9 @@ jobs:
           gh pr create --base QA --head Develop --title "Auto-merge Develop to QA" --body "Automated promotion" || true
           gh pr merge Develop --auto --merge || true
 
-  integrate_to_master:
+  deploy_to_server:
     needs: integrate_to_qa
     if: always() && !failure() && !cancelled() && github.event.pull_request.merged == true && github.base_ref == 'QA'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Auto-propagate to Master
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh pr create --base master --head QA --title "Auto-merge QA to Master" --body "Automated promotion" || true
-          gh pr merge QA --auto --merge || true
-
-  deploy_to_server:
-    needs: integrate_to_master
-    if: always() && !failure() && !cancelled() && (github.event.pull_request.merged == true || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
@@ -74,13 +58,31 @@ jobs:
           port: 2222
           password: "1011"
           script: |
-            echo "Conectado al servidor exitosamente. Deploy automático en curso."
             if [ -d ~/TuColmadoRD ]; then
               cd ~/TuColmadoRD
-              git pull origin master
+              git fetch origin QA
+              git checkout QA
+              git pull origin QA
               docker compose up -d --build
             else
               git clone https://github.com/ODIMSOM/TuColmadoRD ~/TuColmadoRD
               cd ~/TuColmadoRD
+              git checkout QA
               docker compose up -d --build
             fi
+
+  integrate_to_master:
+    needs: deploy_to_server
+    if: always() && !failure() && !cancelled() && github.event.pull_request.merged == true && github.base_ref == 'QA'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Promote to Master only after successful deploy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh pr create --base master --head QA --title "Auto-merge QA to Master" --body "Automated promotion after successful deploy" || true
+          gh pr merge QA --auto --merge || true
