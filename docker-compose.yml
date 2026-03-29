@@ -7,8 +7,6 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD:-1234}
       POSTGRES_DB: TuColmadoDb
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -20,13 +18,23 @@ services:
       context: .
       dockerfile: Dockerfile.gateway
     ports:
-      - "80:80"
+      - "8090:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
       - ReverseProxy__Clusters__api-cluster__Destinations__api-destination__Address=http://api:8080/
       - ReverseProxy__Clusters__auth-cluster__Destinations__auth-destination__Address=http://auth:3000/
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.tucolmado-gateway.rule=Host(`tucolmadord.synsetsolutions.com`)"
+      - "traefik.http.routers.tucolmado-gateway.entrypoints=websecure"
+      - "traefik.http.routers.tucolmado-gateway.tls=true"
+      - "traefik.http.routers.tucolmado-gateway.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.tucolmado-gateway.tls.domains[0].main=tucolmadord.synsetsolutions.com"
+      - "traefik.http.services.tucolmado-gateway.loadbalancer.server.port=8080"
     networks:
       - tucolmadord-network
+      - dokploy-network
     depends_on:
       - api
       - auth
@@ -38,6 +46,7 @@ services:
       dockerfile: Dockerfile.api
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
       - ConnectionStrings__DefaultConnection=Host=db;Database=TuColmadoDb;Username=postgres;Password=${DB_PASSWORD:-1234}
     networks:
       - tucolmadord-network
@@ -59,6 +68,8 @@ services:
 networks:
   tucolmadord-network:
     driver: bridge
+  dokploy-network:
+    external: true
 
 volumes:
   postgres_data:
