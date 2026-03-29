@@ -2,38 +2,33 @@ using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Enums.Sales;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects.Base;
 
 namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
     public class Sale : ITenantEntity
     {
-    private Sale() { }
+        private Sale()
+        {
+            TenantId = TenantIdentifier.Empty;
+            Total = Money.Zero;
+        }
+
         public Guid Id { get; private set; }
         public TenantIdentifier TenantId { get; private set; }
+        public Guid ShiftId { get; private set; }
+        public Guid TerminalId { get; private set; }
+        public SaleStatus Status { get; private set; }
+        public Money Total { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
-        public Guid? CustomerId { get; private set; }
-        public List<SaleDetail> Details { get; private set; } = [];
-
-        public Money SubTotal { get; private set; }
-        public Money TaxTotal { get; private set; }
-        public Money Total { get; private set; }
-
-        public SaleStatus Status { get; private set; }
-        public PaymentMethod PaymentMethod { get; private set; }
-
-        private Sale(TenantIdentifier tenantId, PaymentMethod paymentMethod, Guid? customerId)
+        public static OperationResult<Sale, DomainError> Create(
+            Guid tenantId,
+            Guid terminalId,
+            Guid shiftId,
+            Money total)
         {
-            Id = Guid.NewGuid();
-            TenantId = tenantId;
-            CreatedAt = DateTime.UtcNow;
-            PaymentMethod = paymentMethod;
-            CustomerId = customerId;
-            Status = SaleStatus.Pending;
-
-            SubTotal = Money.Zero;
-            TaxTotal = Money.Zero;
-            Total = Money.Zero;
+            return OperationResult<Sale, DomainError>.Bad(DomainError.Business("sale.not_implemented"));
         }
 
         public static OperationResult<Sale, string> Create(
@@ -41,41 +36,39 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
             PaymentMethod paymentMethod,
             Guid? customerId = null)
         {
-            if (paymentMethod == PaymentMethod.Credit && customerId == null)
-                return OperationResult<Sale, string>.Bad("No se puede realizar una venta a crédito (Fiado) sin un cliente.");
-
-            return OperationResult<Sale, string>.Good(new Sale(tenantId, paymentMethod, customerId));
-        }
-
-        public OperationResult<bool, string> AddItem(Guid productId, Quantity quantity, Money unitPrice, TaxRate taxRate)
-        {
-            var detailResult = SaleDetail.Create(this.Id, productId, quantity, unitPrice, taxRate);
-
-            if (!detailResult.IsGood)
-                return OperationResult<bool, string>.Bad(detailResult.Error!);
-
-            Details.Add(detailResult.Result!);
-            RecalculateTotals();
-
-            return OperationResult<bool, string>.Good(true);
-        }
-
-        private void RecalculateTotals()
-        {
-            decimal subtotalAcc = 0;
-            decimal taxAcc = 0;
-
-            foreach (var detail in Details)
+            var sale = new Sale
             {
-                subtotalAcc += detail.SubTotal.Amount;
-                taxAcc += detail.TaxAmount.Amount;
-            }
+                Id = Guid.NewGuid(),
+                TenantId = tenantId,
+                ShiftId = Guid.Empty,
+                TerminalId = Guid.Empty,
+                Status = SaleStatus.Completed,
+                Total = Money.Zero,
+                CreatedAt = DateTime.UtcNow
+            };
 
-            SubTotal = Money.FromDecimal(subtotalAcc).Result!;
-            TaxTotal = Money.FromDecimal(taxAcc).Result!;
-            Total = SubTotal + TaxTotal;
+            return OperationResult<Sale, string>.Good(sale);
         }
 
-        public void Complete() => Status = SaleStatus.Completed;
+        internal static Sale Rehydrate(
+            Guid id,
+            Guid tenantId,
+            Guid terminalId,
+            Guid shiftId,
+            Money total,
+            SaleStatus status,
+            DateTime createdAt)
+        {
+            return new Sale
+            {
+                Id = id,
+                TenantId = TenantIdentifier.Validate(tenantId).Result,
+                TerminalId = terminalId,
+                ShiftId = shiftId,
+                Total = total,
+                Status = status,
+                CreatedAt = createdAt
+            };
+        }
     }
 }
