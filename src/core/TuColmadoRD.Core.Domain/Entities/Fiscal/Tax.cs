@@ -42,7 +42,10 @@ namespace TuColmadoRD.Core.Domain.Entities.Fiscal
 
         public OperationResult<Money, string> Calculate(Money baseAmount)
         {
-            return Rate.CalculateTax(baseAmount);
+            var taxResult = Rate.CalculateTax(baseAmount);
+            return taxResult.IsGood
+                ? OperationResult<Money, string>.Good(taxResult.Result)
+                : OperationResult<Money, string>.Bad(taxResult.Error.ToString());
         }
     }
 }

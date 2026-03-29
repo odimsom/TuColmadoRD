@@ -16,9 +16,7 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
             b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();
         });
 
-        builder.Property(c => c.Name).IsRequired().HasMaxLength(100);
-        builder.Property(c => c.Description).HasMaxLength(500);
-        builder.Property(c => c.IconPath).HasMaxLength(250);
-        builder.Property(c => c.ColorHex).HasMaxLength(10);
+        builder.Property(c => c.Name).IsRequired().HasMaxLength(80);
+        builder.Property(c => c.IsActive).IsRequired();
     }
 }
