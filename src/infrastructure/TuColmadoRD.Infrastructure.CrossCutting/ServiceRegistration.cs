@@ -31,6 +31,24 @@ public static class ServiceRegistration
             cfg.AddBehavior(typeof(MediatR.IPipelineBehavior<,>), typeof(TuColmadoRD.Core.Application.Behaviors.ClockAdvancePipelineBehavior<,>));
         });
 
+        services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
+        services.Configure<RetentionOptions>(configuration.GetSection(RetentionOptions.SectionName));
+
+        services.AddHttpClient("CloudSyncAPI", (sp, client) => 
+        {
+            var opts = sp.GetRequiredService<Microsoft.Extensions.Options.IOptionsMonitor<OutboxOptions>>().CurrentValue;
+            client.BaseAddress = new Uri(opts.CloudSyncBaseUrl);
+        });
+
+        services.AddKeyedScoped<TuColmadoRD.Core.Application.Interfaces.Sync.IOutboxMessageHandler, TuColmadoRD.Infrastructure.CrossCutting.Sync.SaleCreatedOutboxHandler>("SaleCreated");
+        services.AddKeyedScoped<TuColmadoRD.Core.Application.Interfaces.Sync.IOutboxMessageHandler, TuColmadoRD.Infrastructure.CrossCutting.Sync.ExpenseCreatedOutboxHandler>("ExpenseCreated");
+        services.AddScoped<TuColmadoRD.Core.Application.Handlers.Sync.OutboxMessageDispatcher>();
+
+        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.OutboxWorker>();
+        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.LocalRetentionWorker>();
+        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.CatalogSyncWorker>();
+        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.InventorySyncWorker>();
+
         return services;
     }
 
