@@ -19,6 +19,8 @@ public class TuColmadoDbContext : DbContext
 {
     private readonly ITenantProvider _tenantProvider;
 
+    public Guid CurrentTenantId => (Guid)_tenantProvider.TenantId;
+
     public TuColmadoDbContext(DbContextOptions<TuColmadoDbContext> options, ITenantProvider tenantProvider)
         : base(options)
     {
@@ -96,8 +98,6 @@ public class TuColmadoDbContext : DbContext
     private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder)
         where TEntity : class, ITenantScoped
     {
-        var tenantId = (Guid)_tenantProvider.TenantId;
-        Expression<Func<TEntity, bool>> filter = e => e.TenantId == tenantId;
-        modelBuilder.Entity<TEntity>().HasQueryFilter(filter);
+        modelBuilder.Entity<TEntity>().HasQueryFilter(e => e.TenantId == CurrentTenantId);
     }
 }
