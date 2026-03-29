@@ -11,7 +11,6 @@ using TuColmadoRD.Core.Application.Interfaces.Tenancy;
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.Entities.Sales;
 using TuColmadoRD.Core.Domain.Entities.System;
-using TuColmadoRD.Core.Domain.Enums.Sales;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Security;
 using TuColmadoRD.Core.Domain.ValueObjects;
 using TuColmadoRD.Core.Domain.ValueObjects.Base;
@@ -132,7 +131,13 @@ public class LocalRetentionWorkerTests
     private static async Task SeedSalesAndOutboxAsync(TuColmadoDbContext db, bool uploaded, bool oldEnough, int ageInDays = 10)
     {
         var tenantId = TenantIdentifier.Validate(Guid.NewGuid()).Result;
-        var sale = Sale.Create(tenantId, PaymentMethod.Cash).Result;
+        var sale = Sale.Create(
+            tenantId,
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "RetentionWorker",
+            $"RET-{Guid.NewGuid():N}"[..20],
+            null).Result;
 
         var createdAt = oldEnough ? DateTime.UtcNow.AddDays(-ageInDays) : DateTime.UtcNow;
         SetPrivate(sale, "CreatedAt", createdAt);

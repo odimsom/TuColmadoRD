@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.Entities.Sales;
+using TuColmadoRD.Core.Domain.ValueObjects;
+using SalesQuantity = TuColmadoRD.Core.Domain.Entities.Sales.Quantity;
 
 namespace TuColmadoRD.Infrastructure.Persistence.EntitiesConfigurations.Sales;
 
@@ -12,30 +13,29 @@ public class SaleDetailConfiguration : IEntityTypeConfiguration<SaleDetail>
         builder.ToTable("SaleDetails");
         builder.HasKey(sd => sd.Id);
 
-        builder.OwnsOne(sd => sd.Quantity, b => 
-        {
-            b.Property(q => q.Value).HasColumnName("Quantity").HasColumnType("decimal(18,4)").IsRequired();
-            b.Property(q => q.UnitLabel).HasColumnName("UnitLabel").HasMaxLength(20).IsRequired();
-            b.Property(q => q.Type)
-                .HasConversion(v => v.Id, v => UnitType.FromId(v).Result)
-                .HasColumnName("UnitType")
-                .IsRequired();
-        });
+        builder.Property(sd => sd.Quantity)
+            .HasConversion(v => v.Value, v => SalesQuantity.Of(v).Result)
+            .HasColumnName("Quantity")
+            .HasColumnType("decimal(18,4)")
+            .IsRequired();
 
-        builder.OwnsOne(sd => sd.UnitPrice, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("UnitPrice").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(sd => sd.UnitPrice)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
+            .HasColumnName("UnitPrice")
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
-        builder.OwnsOne(sd => sd.TaxAmount, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("TaxAmount").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(sd => sd.TaxAmount)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
+            .HasColumnName("TaxAmount")
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
-        builder.OwnsOne(sd => sd.SubTotal, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("SubTotal").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(sd => sd.SubTotal)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
+            .HasColumnName("SubTotal")
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
         builder.HasOne<TuColmadoRD.Core.Domain.Entities.Inventory.Product>()
             .WithMany()

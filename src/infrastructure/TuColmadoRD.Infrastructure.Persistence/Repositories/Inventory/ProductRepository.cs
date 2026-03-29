@@ -26,6 +26,24 @@ public class ProductRepository(TuColmadoDbContext dbContext) : GenericRepository
         await _dbContext.Set<Product>().AddAsync(product, ct);
     }
 
+    public async Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyList<Guid> ids, Guid tenantId, CancellationToken ct)
+    {
+        if (ids.Count == 0)
+        {
+            return [];
+        }
+
+        return await _dbContext.Set<Product>()
+            .Where(p => ids.Contains(p.Id) && p.TenantId == tenantId)
+            .ToListAsync(ct);
+    }
+
+    public Task UpdateRangeAsync(IReadOnlyList<Product> products, CancellationToken ct)
+    {
+        _dbContext.Set<Product>().UpdateRange(products);
+        return Task.CompletedTask;
+    }
+
     public async Task<bool> CategoryExistsAsync(Guid categoryId, Guid tenantId, CancellationToken ct)
     {
         return await _dbContext.Set<Category>()
