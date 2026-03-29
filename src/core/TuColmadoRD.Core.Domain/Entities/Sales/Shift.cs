@@ -1,77 +1,160 @@
 using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Core.Domain.Entities.Sales.Events;
 using TuColmadoRD.Core.Domain.Enums.Sales;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects.Base;
 
 namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
     public class Shift : ITenantEntity
     {
-    private Shift() { }
+        private readonly List<object> _domainEvents = [];
+
+        private Shift()
+        {
+            TenantId = TenantIdentifier.Empty;
+            CashierName = string.Empty;
+            OpeningCashAmount = Money.Zero;
+            Status = ShiftStatus.Open;
+            TotalSalesAmount = Money.Zero;
+        }
+
         public Guid Id { get; private set; }
         public TenantIdentifier TenantId { get; private set; }
-        public Guid CashierId { get; private set; }
-
-        public DateTime StartTime { get; private set; }
-        public DateTime? EndTime { get; private set; }
-
-        public Money InitialCash { get; private set; }
-        public Money? ActualCashAtClose { get; private set; }
+        public Guid TerminalId { get; private set; }
         public ShiftStatus Status { get; private set; }
+        public string CashierName { get; private set; }
+        public Money OpeningCashAmount { get; private set; }
+        public Money? ClosingCashAmount { get; private set; }
+        public DateTime OpenedAt { get; private set; }
+        public DateTime? ClosedAt { get; private set; }
+        public Money? ExpectedCashAmount { get; private set; }
+        public Money? ActualCashAmount { get; private set; }
+        public decimal? CashDifferenceAmount { get; private set; }
+        public string? Notes { get; private set; }
+        public int TotalSalesCount { get; private set; }
+        public Money TotalSalesAmount { get; private set; }
+        public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
 
-        public Money TotalCashSales { get; private set; } = Money.Zero;
-        public Money TotalCreditSales { get; private set; } = Money.Zero;
-        public Money TotalCardSales { get; private set; } = Money.Zero;
-        public Money TotalTransferSales { get; private set; } = Money.Zero;
-
-        private Shift(TenantIdentifier tenantId, Guid cashierId, Money initialCash)
+        private Shift(Guid tenantId, Guid terminalId, Money openingCash, string cashierName)
         {
             Id = Guid.NewGuid();
-            TenantId = tenantId;
-            CashierId = cashierId;
-            InitialCash = initialCash;
-            StartTime = DateTime.UtcNow;
+            TenantId = TenantIdentifier.Validate(tenantId).Result;
+            TerminalId = terminalId;
             Status = ShiftStatus.Open;
+            CashierName = cashierName;
+            OpeningCashAmount = openingCash;
+            OpenedAt = DateTime.UtcNow;
+            TotalSalesCount = 0;
+            TotalSalesAmount = Money.Zero;
+
+            AddDomainEvent(new ShiftOpenedDomainEvent(
+                Id,
+                tenantId,
+                terminalId,
+                openingCash.Amount,
+                cashierName,
+                OpenedAt));
         }
 
-        public static OperationResult<Shift, string> Open(TenantIdentifier tenantId, Guid cashierId, Money initialCash)
+        public static OperationResult<Shift, DomainError> Open(
+            Guid tenantId,
+            Guid terminalId,
+            Money openingCash,
+            string cashierName)
         {
-            return OperationResult<Shift, string>.Good(new Shift(tenantId, cashierId, initialCash));
-        }
-
-        public void RegisterSale(PaymentMethod method, Money amount)
-        {
-            switch (method)
+            if (tenantId == Guid.Empty)
             {
-                case PaymentMethod.Cash:
-                    TotalCashSales += amount;
-                    break;
-                case PaymentMethod.Credit:
-                    TotalCreditSales += amount;
-                    break;
-                case PaymentMethod.Card:
-                    TotalCardSales += amount;
-                    break;
-                case PaymentMethod.Transfer:
-                    TotalTransferSales += amount;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(method), method, "Método de pago no soportado.");
+                return OperationResult<Shift, DomainError>.Bad(DomainError.Validation("shift.tenant_required"));
             }
+
+            if (terminalId == Guid.Empty)
+            {
+                return OperationResult<Shift, DomainError>.Bad(DomainError.Validation("shift.terminal_required"));
+            }
+
+            if (string.IsNullOrWhiteSpace(cashierName))
+            {
+                return OperationResult<Shift, DomainError>.Bad(DomainError.Validation("shift.cashier_name_required"));
+            }
+
+            if (cashierName.Length > 100)
+            {
+                return OperationResult<Shift, DomainError>.Bad(DomainError.Validation("shift.cashier_name_too_long"));
+            }
+
+            if (openingCash.Amount < 0)
+            {
+                return OperationResult<Shift, DomainError>.Bad(DomainError.Validation("shift.negative_cash"));
+            }
+
+            return OperationResult<Shift, DomainError>.Good(
+                new Shift(tenantId, terminalId, openingCash, cashierName.Trim()));
         }
 
-        public OperationResult<bool, string> Close(Money actualCash)
+        public OperationResult<Unit, DomainError> Close(
+            Money actualCashAmount,
+            Money expectedCashAmount,
+            string? notes)
         {
             if (Status != ShiftStatus.Open)
-                return OperationResult<bool, string>.Bad("El turno ya está cerrado o suspendido.");
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Business("shift.already_closed"));
+            }
 
-            ActualCashAtClose = actualCash;
-            EndTime = DateTime.UtcNow;
+            if (!string.IsNullOrEmpty(notes) && notes.Length > 500)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.notes_too_long"));
+            }
+
+            if (actualCashAmount.Amount < 0 || expectedCashAmount.Amount < 0)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.negative_cash"));
+            }
+
             Status = ShiftStatus.Closed;
+            ClosedAt = DateTime.UtcNow;
+            ClosingCashAmount = actualCashAmount;
+            ActualCashAmount = actualCashAmount;
+            ExpectedCashAmount = expectedCashAmount;
+            CashDifferenceAmount = actualCashAmount.Amount - expectedCashAmount.Amount;
+            Notes = notes;
 
-            return OperationResult<bool, string>.Good(true);
+            AddDomainEvent(new ShiftClosedDomainEvent(
+                Id,
+                TenantId,
+                TerminalId,
+                actualCashAmount.Amount,
+                expectedCashAmount.Amount,
+                CashDifferenceAmount.Value,
+                TotalSalesCount,
+                TotalSalesAmount.Amount,
+                ClosedAt.Value));
+
+            return OperationResult<Unit, DomainError>.Good(Unit.Value);
         }
 
-        public Money ExpectedCash => InitialCash + TotalCashSales;
+        internal OperationResult<Unit, DomainError> RegisterSale(Money saleTotal)
+        {
+            if (Status != ShiftStatus.Open)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Business("shift.closed_cannot_register_sale"));
+            }
+
+            if (saleTotal.Amount < 0)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.negative_cash"));
+            }
+
+            TotalSalesCount += 1;
+            TotalSalesAmount += saleTotal;
+
+            return OperationResult<Unit, DomainError>.Good(Unit.Value);
+        }
+
+        public void ClearDomainEvents() => _domainEvents.Clear();
+
+        private void AddDomainEvent(object domainEvent) => _domainEvents.Add(domainEvent);
     }
 }

@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TuColmadoRD.Core.Domain.Entities.Sales;
+using TuColmadoRD.Core.Domain.Enums.Sales;
+using TuColmadoRD.Core.Domain.ValueObjects;
 
 namespace TuColmadoRD.Infrastructure.Persistence.EntitiesConfigurations.Sales;
 
@@ -11,46 +13,53 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
         builder.ToTable("Shifts");
         builder.HasKey(s => s.Id);
 
+        builder.Property(s => s.TerminalId).IsRequired();
+        builder.Property(s => s.CashierName).IsRequired().HasMaxLength(100);
+        builder.Property(s => s.OpenedAt).IsRequired();
+        builder.Property(s => s.ClosedAt).IsRequired(false);
+        builder.Property(s => s.Notes).HasMaxLength(500).IsRequired(false);
+        builder.Property(s => s.TotalSalesCount).IsRequired();
+
         builder.OwnsOne(s => s.TenantId, b => 
         {
             b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();
         });
 
-        builder.OwnsOne(s => s.InitialCash, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("InitialCash").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(s => s.Status)
+            .HasConversion(v => v.Id, v => ShiftStatus.FromId(v).Result)
+            .IsRequired();
 
-        builder.OwnsOne(s => s.ActualCashAtClose, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("ActualCashAtClose").HasColumnType("decimal(18,2)");
-        });
+        builder.Property(s => s.OpeningCashAmount)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
-        builder.OwnsOne(s => s.TotalCashSales, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("TotalCashSales").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(s => s.TotalSalesAmount)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
-        builder.OwnsOne(s => s.TotalCreditSales, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("TotalCreditSales").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(s => s.ClosingCashAmount)
+            .HasConversion(v => v == null ? (decimal?)null : v.Amount, v => v == null ? null : Money.FromDecimal(v.Value).Result)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired(false);
 
-        builder.OwnsOne(s => s.TotalCardSales, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("TotalCardSales").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(s => s.ExpectedCashAmount)
+            .HasConversion(v => v == null ? (decimal?)null : v.Amount, v => v == null ? null : Money.FromDecimal(v.Value).Result)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired(false);
 
-        builder.OwnsOne(s => s.TotalTransferSales, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("TotalTransferSales").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(s => s.ActualCashAmount)
+            .HasConversion(v => v == null ? (decimal?)null : v.Amount, v => v == null ? null : Money.FromDecimal(v.Value).Result)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired(false);
 
-        builder.Property(s => s.Status).IsRequired().HasConversion<string>();
+        builder.Property(s => s.CashDifferenceAmount)
+            .HasColumnType("decimal(18,2)")
+            .IsRequired(false);
 
-        builder.HasOne<TuColmadoRD.Core.Domain.Entities.HumanResources.Employee>()
-            .WithMany()
-            .HasForeignKey(s => s.CashierId)
-            .OnDelete(DeleteBehavior.Restrict);
+        builder.Ignore(s => s.DomainEvents);
+
+        builder.HasIndex(nameof(Shift.TerminalId), nameof(Shift.Status));
     }
 }
