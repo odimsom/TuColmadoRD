@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.Entities.Purchasing;
 
 namespace TuColmadoRD.Infrastructure.Persistence.EntitiesConfigurations.Purchasing;
@@ -15,7 +16,10 @@ public class PurchaseDetailConfiguration : IEntityTypeConfiguration<PurchaseDeta
         {
             b.Property(q => q.Value).HasColumnName("Quantity").HasColumnType("decimal(18,4)").IsRequired();
             b.Property(q => q.UnitLabel).HasColumnName("UnitLabel").HasMaxLength(20).IsRequired();
-            b.Property(q => q.Type).HasColumnName("UnitType").IsRequired();
+            b.Property(q => q.Type)
+                .HasConversion(v => v.Id, v => UnitType.FromId(v).Result)
+                .HasColumnName("UnitType")
+                .IsRequired();
         });
 
         builder.OwnsOne(pd => pd.UnitCost, b => 
