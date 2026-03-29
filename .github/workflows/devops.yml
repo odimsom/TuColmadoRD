@@ -64,7 +64,13 @@ jobs:
           username: synset_server
           port: 2222
           password: "1011"
+          envs: MONGODB_URI,JWT_SECRET,JWT_EXPIRES_IN
           script: |
+            cat > ~/TuColmadoRD/.env <<EOF
+            MONGODB_URI=$MONGODB_URI
+            JWT_SECRET=$JWT_SECRET
+            JWT_EXPIRES_IN=$JWT_EXPIRES_IN
+            EOF
             if [ -d ~/TuColmadoRD ]; then
               cd ~/TuColmadoRD
               git fetch origin QA
@@ -77,6 +83,10 @@ jobs:
               git checkout QA
               docker compose up -d --build
             fi
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRES_IN: ${{ secrets.JWT_EXPIRES_IN }}
 
   integrate_to_master:
     needs: deploy_to_server

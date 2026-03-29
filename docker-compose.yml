@@ -61,6 +61,9 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3000
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1d}
     networks:
       - tucolmadord-network
     restart: always
