@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -39,6 +39,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
+    <ProjectReference Include="..\..\core\TuColmadoRD.Core.Application\TuColmadoRD.Core.Application.csproj" />
   </ItemGroup>
 
 </Project>

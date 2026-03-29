@@ -86,9 +86,15 @@
     .base-url code { font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--green); }
     .section-label {
       font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 0.75rem; padding-left: 0.25rem;
+      color: var(--muted); padding-left: 0.25rem; display: flex; justify-content: space-between; align-items: center;
+      cursor: pointer; user-select: none;
     }
-    .group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; }
+    .accordion summary::-webkit-details-marker { display: none; }
+    .accordion summary { list-style: none; margin-bottom: 1rem; }
+    .accordion .arrow { font-size: 0.5rem; transition: transform 0.2s; }
+    .accordion[open] .arrow { transform: rotate(-180deg); }
+    .group { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2.5rem; animation: slideDown 0.2s ease-out; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
     .card {
       background: var(--s1); border: 1px solid var(--border);
       border-radius: 12px; padding: 1rem 1.25rem;
@@ -139,36 +145,48 @@
       <code>tucolmadord.synsetsolutions.com</code>
     </div>
 
-    <div class="section-label">Autenticación</div>
-    <div class="group">
-      <div class="card">
-        <span class="method POST">POST</span>
-        <div class="ep">
-          <div class="ep-path">/api/auth/register</div>
-          <div class="ep-desc">Registrar un nuevo usuario en el sistema</div>
+    <details class="accordion" open>
+      <summary class="section-label">Autenticación <span class="arrow">▼</span></summary>
+      <div class="group">
+        <div class="card">
+          <span class="method POST">POST</span>
+          <div class="ep">
+            <div class="ep-path">/api/auth/register</div>
+            <div class="ep-desc">Registrar un nuevo usuario en el sistema</div>
+          </div>
+          <span class="svc-tag">auth</span>
         </div>
-        <span class="svc-tag">auth</span>
-      </div>
-      <div class="card">
-        <span class="method POST">POST</span>
-        <div class="ep">
-          <div class="ep-path">/api/auth/login</div>
-          <div class="ep-desc">Iniciar sesión y obtener token JWT</div>
+        <div class="card">
+          <span class="method POST">POST</span>
+          <div class="ep">
+            <div class="ep-path">/api/auth/login</div>
+            <div class="ep-desc">Iniciar sesión y obtener token JWT</div>
+          </div>
+          <span class="svc-tag">auth</span>
         </div>
-        <span class="svc-tag">auth</span>
+        <div class="card">
+          <span class="method POST">POST</span>
+          <div class="ep">
+            <div class="ep-path">/api/auth/pair-device</div>
+            <div class="ep-desc">Vincular una nueva terminal a un colmado</div>
+          </div>
+          <span class="svc-tag">auth</span>
+        </div>
       </div>
-    </div>
+    </details>
 
-    <div class="section-label">Sistema · En desarrollo</div>
-    <div class="group">
-      <div class="card" style="opacity:0.4;pointer-events:none">
-        <span class="method POST" style="background:rgba(100,116,139,0.1);color:#334155;border-color:rgba(100,116,139,0.1)">···</span>
-        <div class="ep">
-          <div class="ep-path" style="color:#334155">/api/…</div>
-          <div class="ep-desc">Inventario, ventas, clientes — próximamente</div>
+    <details class="accordion">
+      <summary class="section-label">Sistema · En desarrollo <span class="arrow">▼</span></summary>
+      <div class="group">
+        <div class="card" style="opacity:0.4;pointer-events:none">
+          <span class="method POST" style="background:rgba(100,116,139,0.1);color:#334155;border-color:rgba(100,116,139,0.1)">···</span>
+          <div class="ep">
+            <div class="ep-path" style="color:#334155">/api/…</div>
+            <div class="ep-desc">Inventario, ventas, clientes — próximamente</div>
+          </div>
         </div>
       </div>
-    </div>
+    </details>
   </main>
 
   <footer>TuColmadoRD &copy; 2026 &mdash; Francisco Daniel Castro Borrome</footer>
