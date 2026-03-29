@@ -1,4 +1,9 @@
 using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using TuColmadoRD.Core.Application.Interfaces.Tenancy;
+using TuColmadoRD.Core.Domain.Base;
+using TuColmadoRD.Core.Domain.Entities.Audit;
+using TuColmadoRD.Core.Domain.Entities.System;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
 using TuColmadoRD.Core.Application.Interfaces.Tenancy;
@@ -28,6 +33,7 @@ public class TuColmadoDbContext : DbContext
     }
 
     public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
+    public DbSet<SystemConfig> SystemConfigs => Set<SystemConfig>();
 
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerAccount> CustomerAccounts => Set<CustomerAccount>();
