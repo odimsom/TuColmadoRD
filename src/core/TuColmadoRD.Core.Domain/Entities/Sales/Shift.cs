@@ -135,7 +135,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
             return OperationResult<Unit, DomainError>.Good(Unit.Value);
         }
 
-        internal OperationResult<Unit, DomainError> RegisterSale(Money saleTotal)
+        public OperationResult<Unit, DomainError> RegisterSale(Money saleTotal)
         {
             if (Status != ShiftStatus.Open)
             {
@@ -149,6 +149,29 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
 
             TotalSalesCount += 1;
             TotalSalesAmount += saleTotal;
+
+            return OperationResult<Unit, DomainError>.Good(Unit.Value);
+        }
+
+        public OperationResult<Unit, DomainError> ReverseSale(Money saleTotal)
+        {
+            if (Status != ShiftStatus.Open)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Business("shift.closed_cannot_reverse_sale"));
+            }
+
+            if (saleTotal.Amount < 0)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.negative_cash"));
+            }
+
+            if (TotalSalesCount > 0)
+            {
+                TotalSalesCount -= 1;
+            }
+
+            var newTotal = Math.Max(0m, TotalSalesAmount.Amount - saleTotal.Amount);
+            TotalSalesAmount = Money.FromDecimal(newTotal).Result;
 
             return OperationResult<Unit, DomainError>.Good(Unit.Value);
         }

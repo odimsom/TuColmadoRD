@@ -20,6 +20,16 @@ public interface IProductRepository
     Task AddAsync(Product product, CancellationToken ct);
 
     /// <summary>
+    /// Retrieves products by ids filtered by tenant.
+    /// </summary>
+    Task<IReadOnlyList<Product>> GetByIdsAsync(IReadOnlyList<Guid> ids, Guid tenantId, CancellationToken ct);
+
+    /// <summary>
+    /// Updates a batch of products.
+    /// </summary>
+    Task UpdateRangeAsync(IReadOnlyList<Product> products, CancellationToken ct);
+
+    /// <summary>
     /// Checks whether the category exists for a tenant.
     /// </summary>
     Task<bool> CategoryExistsAsync(Guid categoryId, Guid tenantId, CancellationToken ct);
