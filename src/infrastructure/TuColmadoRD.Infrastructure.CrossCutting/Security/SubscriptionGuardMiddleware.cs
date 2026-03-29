@@ -13,7 +13,8 @@ public class SubscriptionGuardMiddleware
         "/api/device/pair",
         "/api/device/renew-license",
         "/api/device/status",
-        "/health"
+        "/health",
+        "/swagger"
     };
 
     public SubscriptionGuardMiddleware(RequestDelegate next)

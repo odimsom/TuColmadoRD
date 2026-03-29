@@ -3,6 +3,9 @@ using TuColmadoRD.Infrastructure.IOC.ServiceRegistrations;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration
+    .AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -10,9 +13,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddGlobalServices(builder.Configuration);
 
 var app = builder.Build();
+app.UseSwagger();
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
     app.UseSwaggerUI();
 }
 
@@ -21,8 +24,3 @@ app.UseHttpsRedirection();
 app.UseMiddleware<SubscriptionGuardMiddleware>();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

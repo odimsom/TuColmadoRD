@@ -34,6 +34,7 @@ public class TuColmadoDbContext : DbContext
 
     public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
     public DbSet<SystemConfig> SystemConfigs => Set<SystemConfig>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     public DbSet<Customer> Customers => Set<Customer>();
     public DbSet<CustomerAccount> CustomerAccounts => Set<CustomerAccount>();

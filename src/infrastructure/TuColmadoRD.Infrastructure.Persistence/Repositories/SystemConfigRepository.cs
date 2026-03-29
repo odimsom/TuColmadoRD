@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Security;
 using TuColmadoRD.Core.Domain.Entities.System;
+using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Core.Domain.ValueObjects.Base;
 using TuColmadoRD.Infrastructure.Persistence.Contexts;
 
 namespace TuColmadoRD.Infrastructure.Persistence.Repositories;
@@ -47,6 +49,38 @@ public class SystemConfigRepository : ISystemConfigRepository
         {
             await transaction.RollbackAsync();
             throw;
+        }
+    }
+
+    public async Task<OperationResult<string?, DomainError>> GetAsync(string key)
+    {
+        try
+        {
+            var config = await _dbContext.SystemConfigs.AsNoTracking().FirstOrDefaultAsync(c => c.Key == key);
+            return OperationResult<string?, DomainError>.Good(config?.Value);
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<string?, DomainError>.Bad(new TuColmadoRD.Core.Domain.Errors.SyncError("DatabaseQueryFailed", ex.Message));
+        }
+    }
+
+    public async Task<OperationResult<TuColmadoRD.Core.Domain.Base.Result.Unit, DomainError>> SetAsync(string key, string value)
+    {
+        try
+        {
+            var config = await _dbContext.SystemConfigs.FirstOrDefaultAsync(c => c.Key == key);
+            if (config == null)
+                _dbContext.SystemConfigs.Add(new SystemConfig(key, value));
+            else
+                config.UpdateValue(value);
+            
+            await _dbContext.SaveChangesAsync();
+            return OperationResult<TuColmadoRD.Core.Domain.Base.Result.Unit, DomainError>.Good(new TuColmadoRD.Core.Domain.Base.Result.Unit());
+        }
+        catch (Exception ex)
+        {
+            return OperationResult<TuColmadoRD.Core.Domain.Base.Result.Unit, DomainError>.Bad(new TuColmadoRD.Core.Domain.Errors.SyncError("DatabaseCommitFailed", ex.Message));
         }
     }
 }
