@@ -1,5 +1,6 @@
 using TuColmadoRD.Infrastructure.CrossCutting.Security;
 using TuColmadoRD.Infrastructure.IOC.ServiceRegistrations;
+using TuColmadoRD.Presentation.API.Endpoints.Inventory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,7 @@ builder.Configuration
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization();
 
 // Services registrations
 builder.Services.AddGlobalServices(builder.Configuration);
@@ -22,5 +24,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<SubscriptionGuardMiddleware>();
+
+app.MapInventoryEndpoints();
 
 app.Run();

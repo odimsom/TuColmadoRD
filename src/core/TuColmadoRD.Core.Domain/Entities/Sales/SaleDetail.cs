@@ -33,10 +33,10 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         internal static OperationResult<SaleDetail, string> Create(Guid saleId, Guid productId, Quantity quantity, Money unitPrice, TaxRate taxRate)
         {
             var subtotalResult = Money.FromDecimal(quantity.Value * unitPrice.Amount);
-            if (!subtotalResult.IsGood) return OperationResult<SaleDetail, string>.Bad(subtotalResult.Error!);
+            if (!subtotalResult.IsGood) return OperationResult<SaleDetail, string>.Bad(subtotalResult.Error.ToString());
 
             var taxResult = taxRate.CalculateTax(subtotalResult.Result!);
-            if (!taxResult.IsGood) return OperationResult<SaleDetail, string>.Bad(taxResult.Error!);
+            if (!taxResult.IsGood) return OperationResult<SaleDetail, string>.Bad(taxResult.Error.ToString());
 
             return OperationResult<SaleDetail, string>.Good(
                 new SaleDetail(saleId, productId, quantity, unitPrice, taxResult.Result!, subtotalResult.Result!)

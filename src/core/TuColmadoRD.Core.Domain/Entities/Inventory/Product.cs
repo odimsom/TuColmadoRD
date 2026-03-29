@@ -1,152 +1,269 @@
 using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Core.Domain.Entities.Inventory.Events;
 using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects.Base;
 
-namespace TuColmadoRD.Core.Domain.Entities.Inventory
+namespace TuColmadoRD.Core.Domain.Entities.Inventory;
+
+/// <summary>
+/// Product aggregate root for inventory operations.
+/// </summary>
+public class Product : ITenantEntity
 {
-    public class Product : ITenantEntity
+    private readonly List<object> _domainEvents = [];
+
+    private Product()
     {
-    private Product() { }
-        public Guid Id { get; private set; }
-        public TenantIdentifier TenantId { get; private set; }
-        public Guid CategoryId { get; private set; }
-
-        public string Name { get; private set; }
-        public string ShortName { get; private set; }
-        public string? Barcode { get; private set; }
-        public string? ImageUrl { get; private set; }
-
-        public UnitType UnitType { get; private set; }
-        public Quantity StockQuantity { get; private set; }
-        public Quantity MinStock { get; private set; }
-
-        public Money CostPrice { get; private set; }
-        public Money SalePrice { get; private set; }
-
-        public TaxRate ItbisRate { get; private set; }
-        public TaxRate? IscRate { get; private set; }
-
-        private Product(TenantIdentifier tenantId, string name, Guid categoryId, UnitType unitType, Money cost, Money sale, TaxRate itbis)
-        {
-            Id = Guid.NewGuid();
-            TenantId = tenantId;
-            CategoryId = categoryId;
-            Name = name;
-            ShortName = name.Length > 20 ? name[..20] : name;
-            UnitType = unitType;
-            CostPrice = cost;
-            SalePrice = sale;
-            ItbisRate = itbis;
-
-            string label = unitType switch
-            {
-                UnitType.Mass => "Lb",
-                UnitType.Volume => "Lt",
-                _ => "Ud"
-            };
-
-            var stockQuantityResult = Quantity.Create(0, label, unitType);
-            if (!stockQuantityResult.IsGood)
-            {
-                throw new InvalidOperationException(stockQuantityResult.Error ?? "Error al crear la cantidad inicial de stock.");
-            }
-            StockQuantity = stockQuantityResult.Result!;
-
-            var minStockResult = Quantity.Create(5, label, unitType);
-            if (!minStockResult.IsGood)
-            {
-                throw new InvalidOperationException(minStockResult.Error ?? "Error al crear la cantidad m�nima de stock.");
-            }
-            MinStock = minStockResult.Result!;
-        }
-
-        public static OperationResult<Product, string> Create(
-            TenantIdentifier tenantId, string name, Guid categoryId, UnitType unitType,
-            Money cost, Money sale, TaxRate itbis, string? barcode = null)
-        {
-            if (string.IsNullOrWhiteSpace(name)) return OperationResult<Product, string>.Bad("Nombre requerido.");
-            if (sale.Amount <= cost.Amount) return OperationResult<Product, string>.Bad("El precio de venta debe dejar margen de ganancia.");
-
-            var product = new Product(tenantId, name, categoryId, unitType, cost, sale, itbis)
-            {
-                Barcode = barcode
-            };
-            return OperationResult<Product, string>.Good(product);
-        }
-
-        public static OperationResult<Product, string> RehydrateForCatalogSync(
-            Guid productId,
-            TenantIdentifier tenantId,
-            Guid categoryId,
-            string name,
-            Money cost,
-            Money sale,
-            TaxRate itbis)
-        {
-            var createResult = Create(tenantId, name, categoryId, UnitType.Unitary, cost, sale, itbis);
-            if (!createResult.TryGetResult(out var product) || product is null)
-            {
-                createResult.TryGetError(out var error);
-                return OperationResult<Product, string>.Bad(error ?? "No se pudo crear el producto para sync.");
-            }
-
-            product.Id = productId;
-            product.ShortName = name.Length > 20 ? name[..20] : name;
-
-            return OperationResult<Product, string>.Good(product);
-        }
-
-        public OperationResult<Unit, string> UpdateFromCatalogSync(
-            Guid categoryId,
-            string name,
-            Money cost,
-            Money sale)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return OperationResult<Unit, string>.Bad("Nombre requerido.");
-
-            if (sale.Amount <= cost.Amount)
-                return OperationResult<Unit, string>.Bad("El precio de venta debe dejar margen de ganancia.");
-
-            CategoryId = categoryId;
-            Name = name;
-            ShortName = name.Length > 20 ? name[..20] : name;
-            CostPrice = cost;
-            SalePrice = sale;
-
-            return OperationResult<Unit, string>.Good(Unit.Value);
-        }
-
-        public void SetIsc(TaxRate isc) => IscRate = isc;
-
-        public void SetImageUrl(string url) => ImageUrl = url;
-
-        public Money GetTotalTaxedPrice()
-        {
-            var itbis = ItbisRate.CalculateTax(SalePrice).Result!;
-            var isc = IscRate?.CalculateTax(SalePrice).Result! ?? Money.Zero;
-            return SalePrice + itbis + isc;
-        }
-
-        public OperationResult<bool, string> SubtractStock(Quantity amount)
-        {
-            if (amount.Type != this.UnitType)
-                return OperationResult<bool, string>.Bad("Tipo de unidad incompatible.");
-
-            if (amount.Value > StockQuantity.Value)
-                return OperationResult<bool, string>.Bad($"Stock insuficiente de {Name}.");
-
-            StockQuantity = Quantity.Create(StockQuantity.Value - amount.Value, StockQuantity.UnitLabel, this.UnitType).Result!;
-            return OperationResult<bool, string>.Good(true);
-        }
-
-        public void AddStock(Quantity amount)
-        {
-            if (amount.Type == this.UnitType)
-            {
-                StockQuantity = Quantity.Create(StockQuantity.Value + amount.Value, StockQuantity.UnitLabel, this.UnitType).Result!;
-            }
-        }
+        Name = string.Empty;
+        TenantId = TenantIdentifier.Empty;
+        CostPrice = Money.Zero;
+        SalePrice = Money.Zero;
+        ItbisRate = TaxRate.Zero;
+        UnitType = UnitType.Unit;
     }
+
+    private Product(
+        Guid tenantId,
+        string name,
+        Guid categoryId,
+        Money costPrice,
+        Money salePrice,
+        TaxRate itbisRate,
+        UnitType unitType)
+    {
+        Id = Guid.NewGuid();
+        TenantId = TenantIdentifier.Validate(tenantId).Result;
+        Name = name;
+        CategoryId = categoryId;
+        CostPrice = costPrice;
+        SalePrice = salePrice;
+        ItbisRate = itbisRate;
+        UnitType = unitType;
+        IsActive = true;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = DateTime.UtcNow;
+        StockQuantity = 0m;
+
+        AddDomainEvent(new ProductCreatedDomainEvent(Id, tenantId, Name, DateTime.UtcNow));
+    }
+
+    /// <summary>
+    /// Product identifier.
+    /// </summary>
+    public Guid Id { get; private set; }
+
+    /// <summary>
+    /// Tenant identifier.
+    /// </summary>
+    public TenantIdentifier TenantId { get; private set; }
+
+    /// <summary>
+    /// Product name.
+    /// </summary>
+    public string Name { get; private set; }
+
+    /// <summary>
+    /// Category identifier.
+    /// </summary>
+    public Guid CategoryId { get; private set; }
+
+    /// <summary>
+    /// Cost price.
+    /// </summary>
+    public Money CostPrice { get; private set; }
+
+    /// <summary>
+    /// Sale price.
+    /// </summary>
+    public Money SalePrice { get; private set; }
+
+    /// <summary>
+    /// ITBIS tax rate.
+    /// </summary>
+    public TaxRate ItbisRate { get; private set; }
+
+    /// <summary>
+    /// Unit type.
+    /// </summary>
+    public UnitType UnitType { get; private set; }
+
+    /// <summary>
+    /// Indicates if product is active.
+    /// </summary>
+    public bool IsActive { get; private set; }
+
+    /// <summary>
+    /// Creation timestamp (UTC).
+    /// </summary>
+    public DateTime CreatedAt { get; private set; }
+
+    /// <summary>
+    /// Last update timestamp (UTC).
+    /// </summary>
+    public DateTime UpdatedAt { get; private set; }
+
+    /// <summary>
+    /// Current stock quantity.
+    /// </summary>
+    public decimal StockQuantity { get; private set; }
+
+    /// <summary>
+    /// Buffered domain events emitted by this aggregate.
+    /// </summary>
+    public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
+
+    /// <summary>
+    /// Creates a new product aggregate.
+    /// </summary>
+    public static OperationResult<Product, DomainError> Create(
+        Guid tenantId,
+        string name,
+        Guid categoryId,
+        Money costPrice,
+        Money salePrice,
+        TaxRate itbisRate,
+        UnitType unitType)
+    {
+        if (tenantId == Guid.Empty)
+        {
+            return OperationResult<Product, DomainError>.Bad(DomainError.Validation("product.tenant_required"));
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return OperationResult<Product, DomainError>.Bad(DomainError.Validation("product.name_required"));
+        }
+
+        if (name.Length > 120)
+        {
+            return OperationResult<Product, DomainError>.Bad(DomainError.Validation("product.name_too_long"));
+        }
+
+        if (categoryId == Guid.Empty)
+        {
+            return OperationResult<Product, DomainError>.Bad(DomainError.Validation("product.category_required"));
+        }
+
+        if (salePrice.Amount < costPrice.Amount)
+        {
+            return OperationResult<Product, DomainError>.Bad(DomainError.Validation("product.sale_price_below_cost"));
+        }
+
+        return OperationResult<Product, DomainError>.Good(
+            new Product(tenantId, name.Trim(), categoryId, costPrice, salePrice, itbisRate, unitType));
+    }
+
+    /// <summary>
+    /// Rehydrates product for catalog sync insert flow.
+    /// </summary>
+    public static OperationResult<Product, DomainError> RehydrateForCatalogSync(
+        Guid productId,
+        Guid tenantId,
+        Guid categoryId,
+        string name,
+        Money costPrice,
+        Money salePrice,
+        TaxRate itbisRate)
+    {
+        var createResult = Create(tenantId, name, categoryId, costPrice, salePrice, itbisRate, UnitType.Unit);
+        if (!createResult.TryGetResult(out var product) || product is null)
+        {
+            return OperationResult<Product, DomainError>.Bad(createResult.Error);
+        }
+
+        product.Id = productId;
+        product.CreatedAt = DateTime.UtcNow;
+        product.UpdatedAt = DateTime.UtcNow;
+        product.ClearDomainEvents();
+
+        return OperationResult<Product, DomainError>.Good(product);
+    }
+
+    /// <summary>
+    /// Updates product prices.
+    /// </summary>
+    public OperationResult<Unit, DomainError> UpdatePrice(Money newCostPrice, Money newSalePrice)
+    {
+        if (newSalePrice.Amount < newCostPrice.Amount)
+        {
+            return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("product.sale_price_below_cost"));
+        }
+
+        CostPrice = newCostPrice;
+        SalePrice = newSalePrice;
+        UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new ProductPriceUpdatedDomainEvent(Id, TenantId, SalePrice, DateTime.UtcNow));
+
+        return OperationResult<Unit, DomainError>.Good(Unit.Value);
+    }
+
+    /// <summary>
+    /// Updates basic fields from catalog synchronization payload.
+    /// </summary>
+    public OperationResult<Unit, DomainError> UpdateFromCatalogSync(
+        Guid categoryId,
+        string name,
+        Money costPrice,
+        Money salePrice)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("product.name_required"));
+        }
+
+        if (name.Length > 120)
+        {
+            return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("product.name_too_long"));
+        }
+
+        if (salePrice.Amount < costPrice.Amount)
+        {
+            return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("product.sale_price_below_cost"));
+        }
+
+        CategoryId = categoryId;
+        Name = name.Trim();
+        CostPrice = costPrice;
+        SalePrice = salePrice;
+        UpdatedAt = DateTime.UtcNow;
+
+        return OperationResult<Unit, DomainError>.Good(Unit.Value);
+    }
+
+    /// <summary>
+    /// Adjusts stock by delta quantity.
+    /// </summary>
+    public OperationResult<Unit, DomainError> AdjustStock(decimal delta)
+    {
+        var newStock = StockQuantity + delta;
+        if (newStock < 0)
+        {
+            return OperationResult<Unit, DomainError>.Bad(DomainError.Business("product.insufficient_stock"));
+        }
+
+        StockQuantity = newStock;
+        UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new StockAdjustedDomainEvent(Id, TenantId, delta, StockQuantity, DateTime.UtcNow));
+
+        return OperationResult<Unit, DomainError>.Good(Unit.Value);
+    }
+
+    /// <summary>
+    /// Deactivates product.
+    /// </summary>
+    public void Deactivate()
+    {
+        IsActive = false;
+        UpdatedAt = DateTime.UtcNow;
+        AddDomainEvent(new ProductDeactivatedDomainEvent(Id, TenantId, DateTime.UtcNow));
+    }
+
+    /// <summary>
+    /// Clears pending aggregate domain events.
+    /// </summary>
+    public void ClearDomainEvents() => _domainEvents.Clear();
+
+    private void AddDomainEvent(object @event) => _domainEvents.Add(@event);
 }
