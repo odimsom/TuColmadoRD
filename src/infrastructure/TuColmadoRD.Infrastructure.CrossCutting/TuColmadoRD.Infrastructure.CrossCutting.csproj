@@ -19,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\core\TuColmadoRD.Core.Application\TuColmadoRD.Core.Application.csproj" />
     <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
+    <ProjectReference Include="..\TuColmadoRD.Infrastructure.Persistence\TuColmadoRD.Infrastructure.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
