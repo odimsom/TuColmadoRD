@@ -56,7 +56,7 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
             var minStockResult = Quantity.Create(5, label, unitType);
             if (!minStockResult.IsGood)
             {
-                throw new InvalidOperationException(minStockResult.Error ?? "Error al crear la cantidad mínima de stock.");
+                throw new InvalidOperationException(minStockResult.Error ?? "Error al crear la cantidad mï¿½nima de stock.");
             }
             MinStock = minStockResult.Result!;
         }
@@ -73,6 +73,49 @@ namespace TuColmadoRD.Core.Domain.Entities.Inventory
                 Barcode = barcode
             };
             return OperationResult<Product, string>.Good(product);
+        }
+
+        public static OperationResult<Product, string> RehydrateForCatalogSync(
+            Guid productId,
+            TenantIdentifier tenantId,
+            Guid categoryId,
+            string name,
+            Money cost,
+            Money sale,
+            TaxRate itbis)
+        {
+            var createResult = Create(tenantId, name, categoryId, UnitType.Unitary, cost, sale, itbis);
+            if (!createResult.TryGetResult(out var product) || product is null)
+            {
+                createResult.TryGetError(out var error);
+                return OperationResult<Product, string>.Bad(error ?? "No se pudo crear el producto para sync.");
+            }
+
+            product.Id = productId;
+            product.ShortName = name.Length > 20 ? name[..20] : name;
+
+            return OperationResult<Product, string>.Good(product);
+        }
+
+        public OperationResult<Unit, string> UpdateFromCatalogSync(
+            Guid categoryId,
+            string name,
+            Money cost,
+            Money sale)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return OperationResult<Unit, string>.Bad("Nombre requerido.");
+
+            if (sale.Amount <= cost.Amount)
+                return OperationResult<Unit, string>.Bad("El precio de venta debe dejar margen de ganancia.");
+
+            CategoryId = categoryId;
+            Name = name;
+            ShortName = name.Length > 20 ? name[..20] : name;
+            CostPrice = cost;
+            SalePrice = sale;
+
+            return OperationResult<Unit, string>.Good(Unit.Value);
         }
 
         public void SetIsc(TaxRate isc) => IscRate = isc;

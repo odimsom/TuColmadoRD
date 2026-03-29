@@ -8,6 +8,8 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
 
         private TenantIdentifier(Guid value) => Value = value;
 
+        public static TenantIdentifier Empty => new(Guid.Empty);
+
         public static OperationResult<TenantIdentifier, string> Validate(Guid value)
         {
             return value == Guid.Empty

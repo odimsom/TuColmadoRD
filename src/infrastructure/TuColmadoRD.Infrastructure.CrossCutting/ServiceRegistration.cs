@@ -23,6 +23,7 @@ public static class ServiceRegistration
 
         services.AddScoped<TuColmadoRD.Core.Application.Interfaces.Security.ITimeGuard, TimeGuardService>();
         services.AddScoped<TuColmadoRD.Core.Application.Interfaces.Security.ILicenseVerifier, LicenseVerifierService>();
+        services.AddSingleton<TuColmadoRD.Core.Application.Interfaces.Security.IClock, SystemClock>();
 
         var applicationAssembly = typeof(TuColmadoRD.Core.Application.Behaviors.ICommandMarker).Assembly;
         services.AddMediatR(cfg =>
@@ -64,6 +65,7 @@ public static class ServiceRegistration
         IConfiguration configuration)
     {
         services.Configure<LocalDeviceOptions>(configuration.GetSection("LocalDevice"));
+        services.AddSingleton<IDeviceIdentityFileStore, DeviceIdentityFileStore>();
         services.AddSingleton<LocalDeviceTenantProvider>();
         services.AddSingleton<ITenantProvider>(sp => sp.GetRequiredService<LocalDeviceTenantProvider>());
         services.AddSingleton<IDeviceIdentityStore>(sp => sp.GetRequiredService<LocalDeviceTenantProvider>());
