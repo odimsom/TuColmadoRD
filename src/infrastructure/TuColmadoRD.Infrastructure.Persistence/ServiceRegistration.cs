@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TuColmadoRD.Core.Application.Interfaces.Security;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Audit;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Base;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Customers;
@@ -11,8 +12,10 @@ using TuColmadoRD.Core.Domain.Interfaces.Repositories.Inventory;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Logistics;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Purchasing;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Sales;
+using TuColmadoRD.Core.Domain.Interfaces.Repositories.Security;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Treasury;
 using TuColmadoRD.Infrastructure.Persistence.Contexts;
+using TuColmadoRD.Infrastructure.Persistence.Repositories;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.Audit;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.Base;
 using TuColmadoRD.Infrastructure.Persistence.Repositories.Customers;
@@ -64,9 +67,13 @@ public static class ServiceRegistration
         }
         #endregion
 
+        // Repositories Configuration
         services.AddTransient(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 
         #region Registration of repositories for each module
+        // System
+        services.AddTransient<ISystemConfigRepository, SystemConfigRepository>();
+        
         // Audit
         services.AddScoped<IAuditTrailRepository, AuditTrailRepository>();
 

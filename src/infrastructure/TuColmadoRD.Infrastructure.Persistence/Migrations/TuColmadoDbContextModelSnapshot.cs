@@ -233,6 +233,17 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.HumanResources.WorkShift", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
                     b.ToTable("WorkShifts", "HumanResources");
                 });
 
@@ -550,6 +561,23 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.HasIndex("CashierId");
 
                     b.ToTable("Shifts", "Sales");
+                });
+
+            modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.System.SystemConfig", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("SystemConfigs", "System");
                 });
 
             modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.Treasury.CashBox", b =>
@@ -1085,6 +1113,29 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                     b.Navigation("IdCard");
 
                     b.Navigation("Phone");
+
+                    b.Navigation("TenantId")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("TuColmadoRD.Core.Domain.Entities.HumanResources.WorkShift", b =>
+                {
+                    b.OwnsOne("TuColmadoRD.Core.Domain.ValueObjects.TenantIdentifier", "TenantId", b1 =>
+                        {
+                            b1.Property<Guid>("WorkShiftId")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<Guid>("Value")
+                                .HasColumnType("uniqueidentifier")
+                                .HasColumnName("TenantId");
+
+                            b1.HasKey("WorkShiftId");
+
+                            b1.ToTable("WorkShifts", "HumanResources");
+
+                            b1.WithOwner()
+                                .HasForeignKey("WorkShiftId");
+                        });
 
                     b.Navigation("TenantId")
                         .IsRequired();
