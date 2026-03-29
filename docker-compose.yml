@@ -28,7 +28,9 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.tucolmado-gateway.rule=Host(`tucolmadord.synsetsolutions.com`)"
       - "traefik.http.routers.tucolmado-gateway.entrypoints=websecure"
+      - "traefik.http.routers.tucolmado-gateway.tls=true"
       - "traefik.http.routers.tucolmado-gateway.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.tucolmado-gateway.tls.domains[0].main=tucolmadord.synsetsolutions.com"
       - "traefik.http.services.tucolmado-gateway.loadbalancer.server.port=8080"
     networks:
       - tucolmadord-network
