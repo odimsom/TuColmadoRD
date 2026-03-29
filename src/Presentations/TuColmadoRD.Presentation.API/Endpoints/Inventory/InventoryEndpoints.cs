@@ -65,7 +65,7 @@ public static class InventoryEndpoints
                 return productResult.Error.MapDomainError();
             }
 
-            return TypedResults.Ok(new { newStockQuantity = product.StockQuantity });
+            return TypedResults.Ok(new { newStockQuantity = product!.StockQuantity });
         });
 
         group.MapDelete("/products/{id:guid}", async (Guid id, IMediator mediator, CancellationToken ct) =>
