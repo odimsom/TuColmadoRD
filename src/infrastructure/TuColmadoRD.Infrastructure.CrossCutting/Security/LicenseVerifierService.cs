@@ -13,13 +13,19 @@ public class LicenseVerifierService : ILicenseVerifier
 {
     private readonly IDeviceIdentityStore _identityStore;
     private readonly ITimeGuard _timeGuard;
+    private readonly IClock _clock;
+    private readonly ITenantProvider _tenantProvider;
 
     public LicenseVerifierService(
         IDeviceIdentityStore identityStore,
-        ITimeGuard timeGuard)
+        ITimeGuard timeGuard,
+        IClock clock,
+        ITenantProvider tenantProvider)
     {
         _identityStore = identityStore;
         _timeGuard = timeGuard;
+        _clock = clock;
+        _tenantProvider = tenantProvider;
     }
 
     public async Task<OperationResult<LicenseStatus, SubscriptionError>> VerifyAsync()
@@ -67,7 +73,7 @@ public class LicenseVerifierService : ILicenseVerifier
             var terminalIdClaim = jwt.Claims.FirstOrDefault(c => c.Type == "terminal_id")?.Value;
             var validUntilClaim = jwt.Claims.FirstOrDefault(c => c.Type == "valid_until")?.Value;
 
-            if (terminalIdClaim != identity.TerminalId.ToString())
+            if (terminalIdClaim != _tenantProvider.TerminalId.ToString())
             {
                 return OperationResult<LicenseStatus, SubscriptionError>.Bad(SubscriptionError.TerminalMismatch);
             }
@@ -79,14 +85,15 @@ public class LicenseVerifierService : ILicenseVerifier
 
             var validUntil = DateTimeOffset.FromUnixTimeSeconds(validUntilUnix).UtcDateTime;
 
-            var advanceResult = await _timeGuard.AdvanceTimeAsync(DateTime.UtcNow);
+            var now = _clock.UtcNow;
+            var advanceResult = await _timeGuard.AdvanceTimeAsync(now);
             if (!advanceResult.IsGood)
             {
                 advanceResult.TryGetError(out var timeError);
                 return OperationResult<LicenseStatus, SubscriptionError>.Bad(timeError!);
             }
 
-            if (DateTime.UtcNow > validUntil)
+            if (now > validUntil)
             {
                 return OperationResult<LicenseStatus, SubscriptionError>.Bad(SubscriptionError.SubscriptionExpired);
             }

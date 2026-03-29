@@ -8,7 +8,6 @@ using TuColmadoRD.Core.Application.DTOs.Sync;
 using TuColmadoRD.Core.Application.Interfaces.Infrastructure.CrossCutting.Network;
 using TuColmadoRD.Core.Application.Interfaces.Tenancy;
 using TuColmadoRD.Core.Domain.Entities.Inventory;
-using TuColmadoRD.Core.Domain.Enums.Inventory_Purchasing;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Security;
 using TuColmadoRD.Core.Domain.ValueObjects;
 using TuColmadoRD.Core.Domain.Base.Result;
@@ -152,54 +151,42 @@ public class CatalogSyncWorker : BackgroundService
         ProductSyncDto dto,
         CancellationToken ct)
     {
-        var priceResult = Money.FromDecimal(dto.Price);
+        var costResult = Money.FromDecimal(0m);
+        var saleResult = Money.FromDecimal(dto.Price);
         var itbisResult = TaxRate.Create(0m);
 
-        if (!priceResult.IsGood || !itbisResult.IsGood)
+        if (!costResult.IsGood || !saleResult.IsGood || !itbisResult.IsGood)
         {
             return OperationResult<Unit, DomainError>.Bad(
                 new SyncError("ProductMappingFailed", "invalid_product_price_or_tax"));
         }
 
-        var cost = priceResult.Result!;
-        var sale = priceResult.Result!;
+        var cost = costResult.Result!;
+        var sale = saleResult.Result!;
         var itbis = itbisResult.Result!;
 
         var existing = await dbContext.Products.FirstOrDefaultAsync(p => p.Id == dto.ProductId, ct);
         if (existing is null)
         {
-            var createResult = Product.Create(tenantId, dto.Name, dto.CategoryId, UnitType.Unitary, cost, sale, itbis);
+            var createResult = Product.RehydrateForCatalogSync(dto.ProductId, tenantId, dto.CategoryId, dto.Name, cost, sale, itbis);
             if (!createResult.IsGood || !createResult.TryGetResult(out var created) || created is null)
             {
                 return OperationResult<Unit, DomainError>.Bad(
                     new SyncError("ProductCreateFailed", "failed_to_create_local_product"));
             }
-
-            SetPrivate(created, nameof(Product.Id), dto.ProductId);
-            SetPrivate(created, nameof(Product.ShortName), dto.Name.Length > 20 ? dto.Name[..20] : dto.Name);
             dbContext.Products.Add(created);
 
             return OperationResult<Unit, DomainError>.Good(new Unit());
         }
 
-        SetPrivate(existing, nameof(Product.Name), dto.Name);
-        SetPrivate(existing, nameof(Product.ShortName), dto.Name.Length > 20 ? dto.Name[..20] : dto.Name);
-        SetPrivate(existing, nameof(Product.CategoryId), dto.CategoryId);
-        SetPrivate(existing, nameof(Product.CostPrice), cost);
-        SetPrivate(existing, nameof(Product.SalePrice), sale);
-
-        return OperationResult<Unit, DomainError>.Good(new Unit());
-    }
-
-    private static void SetPrivate<TTarget>(TTarget target, string propertyName, object value)
-    {
-        var property = typeof(TTarget).GetProperty(propertyName, System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic);
-        if (property is null)
+        var updateResult = existing.UpdateFromCatalogSync(dto.CategoryId, dto.Name, cost, sale);
+        if (!updateResult.IsGood)
         {
-            throw new InvalidOperationException($"Property {propertyName} was not found on {typeof(TTarget).Name}");
+            return OperationResult<Unit, DomainError>.Bad(
+                new SyncError("ProductUpdateFailed", "failed_to_update_local_product"));
         }
 
-        property.SetValue(target, value);
+        return OperationResult<Unit, DomainError>.Good(new Unit());
     }
     
     public override void Dispose()
