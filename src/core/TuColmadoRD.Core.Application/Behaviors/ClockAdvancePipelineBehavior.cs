@@ -9,7 +9,7 @@ namespace TuColmadoRD.Core.Application.Behaviors;
 public interface ICommandMarker { }
 
 public class ClockAdvancePipelineBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>, ICommandMarker
+    where TRequest : IRequest<TResponse>
 {
     private readonly ITimeGuard _timeGuard;
 
@@ -20,6 +20,11 @@ public class ClockAdvancePipelineBehavior<TRequest, TResponse> : IPipelineBehavi
 
     public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
     {
+        if (request is not ICommandMarker)
+        {
+            return await next();
+        }
+
         var advanceResult = await _timeGuard.AdvanceTimeAsync(DateTime.UtcNow);
         
         if (!advanceResult.IsGood)

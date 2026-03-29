@@ -102,6 +102,7 @@ public class OutboxWorker : BackgroundService
     {
         if (error.Code == "PermanentFailure" || error.Code == "unknown_outbox_type" || error.Message.StartsWith("cloud_rejected:", StringComparison.OrdinalIgnoreCase))
         {
+            message.RecordTransientFailure(error.Message);
             message.RecordPermanentFailure(error.Message);
             _logger.LogCritical("Outbox permanent failure {MessageId}: {Error}", message.Id, error.Message);
             return;

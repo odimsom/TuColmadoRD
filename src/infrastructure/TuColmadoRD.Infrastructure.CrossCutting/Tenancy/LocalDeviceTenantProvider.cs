@@ -14,17 +14,19 @@ namespace TuColmadoRD.Infrastructure.CrossCutting.Tenancy;
 public sealed class LocalDeviceTenantProvider : ITenantProvider, IDeviceIdentityStore
 {
     private readonly LocalDeviceOptions _options;
+    private readonly IDeviceIdentityFileStore _fileStore;
     private DeviceIdentity? _cached;
 
-    public LocalDeviceTenantProvider(IOptions<LocalDeviceOptions> options)
+    public LocalDeviceTenantProvider(IOptions<LocalDeviceOptions> options, IDeviceIdentityFileStore fileStore)
     {
         _options = options.Value;
+        _fileStore = fileStore;
         Load();
     }
 
     public TenantIdentifier TenantId =>
         _cached is null
-            ? TenantIdentifier.Validate(Guid.Empty).TryGetResult(out var e) ? e! : default!
+            ? TenantIdentifier.Empty
             : TenantIdentifier.Validate(_cached.TenantId).TryGetResult(out var t) ? t! : default!;
 
     public Guid TerminalId => _cached?.TerminalId ?? Guid.Empty;
@@ -38,28 +40,33 @@ public sealed class LocalDeviceTenantProvider : ITenantProvider, IDeviceIdentity
 
     public OperationResult<Unit, DevicePairingError> Persist(DeviceIdentity identity)
     {
-        try
-        {
-            var json = JsonSerializer.SerializeToUtf8Bytes(identity);
-            var encrypted = Encrypt(json);
-            File.WriteAllBytes(_options.IdentityFilePath, encrypted);
-            _cached = identity;
-            return OperationResult<Unit, DevicePairingError>.Good(Unit.Value);
-        }
-        catch
+        var json = JsonSerializer.SerializeToUtf8Bytes(identity);
+        var encrypted = Encrypt(json);
+        var writeResult = _fileStore.WriteAllBytes(_options.IdentityFilePath, encrypted);
+
+        if (!writeResult.IsGood)
         {
             return OperationResult<Unit, DevicePairingError>.Bad(DevicePairingError.IoError);
         }
+
+        _cached = identity;
+        return OperationResult<Unit, DevicePairingError>.Good(Unit.Value);
     }
 
     private void Load()
     {
-        if (!File.Exists(_options.IdentityFilePath))
+        if (!_fileStore.Exists(_options.IdentityFilePath))
             return;
+
+        var readResult = _fileStore.ReadAllBytes(_options.IdentityFilePath);
+        if (!readResult.TryGetResult(out var encrypted) || encrypted is null)
+        {
+            _cached = null;
+            return;
+        }
 
         try
         {
-            var encrypted = File.ReadAllBytes(_options.IdentityFilePath);
             var json = Decrypt(encrypted);
             _cached = JsonSerializer.Deserialize<DeviceIdentity>(json);
         }
