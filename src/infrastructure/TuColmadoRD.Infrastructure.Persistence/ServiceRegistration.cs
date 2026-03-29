@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using TuColmadoRD.Core.Application.Interfaces.Security;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Audit;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Base;
 using TuColmadoRD.Core.Domain.Interfaces.Repositories.Customers;
