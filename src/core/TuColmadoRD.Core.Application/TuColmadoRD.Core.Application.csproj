@@ -7,8 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\infrastructure\TuColmadoRD.Infrastructure.Persistence\TuColmadoRD.Infrastructure.Persistence.csproj" />
-    <ProjectReference Include="..\src\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
+    <PackageReference Include="MediatR" Version="12.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\core\TuColmadoRD.Core.Domain\TuColmadoRD.Core.Domain.csproj" />
   </ItemGroup>
 
 </Project>
