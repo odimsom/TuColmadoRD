@@ -95,6 +95,10 @@ public static class ServiceRegistration
         services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<IUnitConversionRepository, UnitConversionRepository>();
+        services.AddScoped<TuColmadoRD.Core.Application.Inventory.Abstractions.IProductRepository, ProductRepository>();
+        services.AddScoped<TuColmadoRD.Core.Application.Inventory.Abstractions.IProductReadRepository, ProductReadRepository>();
+        services.AddScoped<TuColmadoRD.Core.Application.Inventory.Abstractions.IOutboxRepository, OutboxRepository>();
+        services.AddScoped<TuColmadoRD.Core.Application.Inventory.Abstractions.IUnitOfWork, UnitOfWork>();
 
         // Logistics
         services.AddScoped<IDeliveryOrderRepository, DeliveryOrderRepository>();

@@ -1,54 +1,69 @@
 using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects.Base;
 
-namespace TuColmadoRD.Core.Domain.Entities.Inventory
+namespace TuColmadoRD.Core.Domain.Entities.Inventory;
+
+/// <summary>
+/// Inventory category entity.
+/// </summary>
+public class Category : ITenantEntity
 {
-    public class Category : ITenantEntity
+    private Category()
     {
-    private Category() { }
-        public Guid Id { get; private set; }
-        public TenantIdentifier TenantId { get; private set; }
-        public string Name { get; private set; }
-        public string? Description { get; private set; }
+        Name = string.Empty;
+        TenantId = TenantIdentifier.Empty;
+    }
 
-        public string? IconPath { get; private set; }
-        public string? ColorHex { get; private set; }
+    private Category(Guid tenantId, string name)
+    {
+        Id = Guid.NewGuid();
+        TenantId = TenantIdentifier.Validate(tenantId).Result;
+        Name = name;
+        IsActive = true;
+    }
 
-        public bool IsActive { get; private set; }
+    /// <summary>
+    /// Category identifier.
+    /// </summary>
+    public Guid Id { get; private set; }
 
-        private Category(TenantIdentifier tenantId, string name, string? description, string? icon, string? color)
+    /// <summary>
+    /// Tenant identifier.
+    /// </summary>
+    public TenantIdentifier TenantId { get; private set; }
+
+    /// <summary>
+    /// Category display name.
+    /// </summary>
+    public string Name { get; private set; }
+
+    /// <summary>
+    /// Indicates if category is active.
+    /// </summary>
+    public bool IsActive { get; private set; }
+
+    /// <summary>
+    /// Creates a category.
+    /// </summary>
+    public static OperationResult<Category, DomainError> Create(Guid tenantId, string name)
+    {
+        if (tenantId == Guid.Empty)
         {
-            Id = Guid.NewGuid();
-            TenantId = tenantId;
-            Name = name;
-            Description = description;
-            IconPath = icon;
-            ColorHex = color;
-            IsActive = true;
+            return OperationResult<Category, DomainError>.Bad(DomainError.Validation("category.tenant_required"));
         }
 
-        public static OperationResult<Category, string> Create(
-            TenantIdentifier tenantId,
-            string name,
-            string? description = null,
-            string? icon = null,
-            string? color = "#3498db")
+        if (string.IsNullOrWhiteSpace(name))
         {
-            if (string.IsNullOrWhiteSpace(name))
-                return OperationResult<Category, string>.Bad("El nombre de la categoría es obligatorio.");
-
-            return OperationResult<Category, string>.Good(
-                new Category(tenantId, name.Trim(), description?.Trim(), icon, color)
-            );
+            return OperationResult<Category, DomainError>.Bad(DomainError.Validation("category.name_required"));
         }
 
-        public void UpdateMetadata(string icon, string color)
+        if (name.Length > 80)
         {
-            IconPath = icon;
-            ColorHex = color;
+            return OperationResult<Category, DomainError>.Bad(DomainError.Validation("category.name_too_long"));
         }
 
-        public void Deactivate() => IsActive = false;
+        return OperationResult<Category, DomainError>.Good(new Category(tenantId, name.Trim()));
     }
 }

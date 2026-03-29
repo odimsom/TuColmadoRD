@@ -21,7 +21,7 @@ namespace TuColmadoRD.Core.Domain.ValueObjects
             if (value < 0)
                 return OperationResult<Quantity, string>.Bad("La cantidad no puede ser negativa.");
 
-            if (type == UnitType.Unitary && value % 1 != 0)
+            if (type == UnitType.Unit && value % 1 != 0)
             {
                 return OperationResult<Quantity, string>.Bad("Los productos por unidad no pueden venderse en fracciones.");
             }

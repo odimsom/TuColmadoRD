@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using FluentValidation;
 using TuColmadoRD.Core.Application.Interfaces.Infrastructure.CrossCutting.Network;
 using TuColmadoRD.Core.Application.Interfaces.Tenancy;
 using TuColmadoRD.Infrastructure.CrossCutting.Configuration;
@@ -29,8 +30,10 @@ public static class ServiceRegistration
         services.AddMediatR(cfg =>
         {
             cfg.RegisterServicesFromAssembly(applicationAssembly);
+            cfg.AddBehavior(typeof(MediatR.IPipelineBehavior<,>), typeof(TuColmadoRD.Core.Application.Behaviors.ValidationBehavior<,>));
             cfg.AddBehavior(typeof(MediatR.IPipelineBehavior<,>), typeof(TuColmadoRD.Core.Application.Behaviors.ClockAdvancePipelineBehavior<,>));
         });
+        services.AddValidatorsFromAssembly(applicationAssembly);
 
         services.Configure<OutboxOptions>(configuration.GetSection(OutboxOptions.SectionName));
         services.Configure<RetentionOptions>(configuration.GetSection(RetentionOptions.SectionName));
