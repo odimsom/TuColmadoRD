@@ -1,5 +1,8 @@
+using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using TuColmadoRD.Core.Application.Interfaces.Tenancy;
+using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Entities.Audit;
 using TuColmadoRD.Core.Domain.Entities.Customers;
 using TuColmadoRD.Core.Domain.Entities.Fiscal;
@@ -14,8 +17,12 @@ namespace TuColmadoRD.Infrastructure.Persistence.Contexts;
 
 public class TuColmadoDbContext : DbContext
 {
-    public TuColmadoDbContext(DbContextOptions<TuColmadoDbContext> options) : base(options)
+    private readonly ITenantProvider _tenantProvider;
+
+    public TuColmadoDbContext(DbContextOptions<TuColmadoDbContext> options, ITenantProvider tenantProvider)
+        : base(options)
     {
+        _tenantProvider = tenantProvider;
     }
 
     public DbSet<AuditTrail> AuditTrails => Set<AuditTrail>();
@@ -60,19 +67,37 @@ public class TuColmadoDbContext : DbContext
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
             var clrType = entityType.ClrType;
-            if (clrType != null && !entityType.IsOwned())
+            if (clrType is null || entityType.IsOwned())
+                continue;
+
+            var ns = clrType.Namespace;
+            if (!string.IsNullOrEmpty(ns) && ns.Contains("Entities."))
             {
-                var ns = clrType.Namespace;
-                if (!string.IsNullOrEmpty(ns) && ns.Contains("Entities."))
-                {
-                    var schemaName = ns.Split('.').Last();
-                    var tableName = entityType.GetTableName();
-                    if (!string.IsNullOrEmpty(tableName))
-                    {
-                        entityType.SetSchema(schemaName);
-                    }
-                }
+                var schemaName = ns.Split('.').Last();
+                var tableName = entityType.GetTableName();
+                if (!string.IsNullOrEmpty(tableName))
+                    entityType.SetSchema(schemaName);
             }
+
+            if (typeof(ITenantScoped).IsAssignableFrom(clrType))
+                ApplyTenantFilter(modelBuilder, clrType);
         }
+    }
+
+    private void ApplyTenantFilter(ModelBuilder modelBuilder, Type entityType)
+    {
+        var method = typeof(TuColmadoDbContext)
+            .GetMethod(nameof(SetTenantFilter), BindingFlags.NonPublic | BindingFlags.Instance)!
+            .MakeGenericMethod(entityType);
+
+        method.Invoke(this, [modelBuilder]);
+    }
+
+    private void SetTenantFilter<TEntity>(ModelBuilder modelBuilder)
+        where TEntity : class, ITenantScoped
+    {
+        var tenantId = (Guid)_tenantProvider.TenantId;
+        Expression<Func<TEntity, bool>> filter = e => e.TenantId == tenantId;
+        modelBuilder.Entity<TEntity>().HasQueryFilter(filter);
     }
 }
