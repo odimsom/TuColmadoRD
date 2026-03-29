@@ -38,6 +38,9 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
             migrationBuilder.EnsureSchema(
                 name: "Sales");
 
+            migrationBuilder.EnsureSchema(
+                name: "System");
+
             migrationBuilder.CreateTable(
                 name: "AuditTrails",
                 schema: "Audit",
@@ -254,6 +257,20 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "SystemConfigs",
+                schema: "System",
+                columns: table => new
+                {
+                    Key = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SystemConfigs", x => x.Key);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Taxes",
                 schema: "Fiscal",
                 columns: table => new
@@ -291,9 +308,13 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
                 schema: "HumanResources",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TenantId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false)
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_WorkShifts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -749,6 +770,10 @@ namespace TuColmadoRD.Infrastructure.Persistence.Migrations
             migrationBuilder.DropTable(
                 name: "SaleDetails",
                 schema: "Sales");
+
+            migrationBuilder.DropTable(
+                name: "SystemConfigs",
+                schema: "System");
 
             migrationBuilder.DropTable(
                 name: "Taxes",

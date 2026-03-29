@@ -4,6 +4,7 @@ using TuColmadoRD.Core.Application.Interfaces.Infrastructure.CrossCutting.Networ
 using TuColmadoRD.Core.Application.Interfaces.Tenancy;
 using TuColmadoRD.Infrastructure.CrossCutting.Configuration;
 using TuColmadoRD.Infrastructure.CrossCutting.Network;
+using TuColmadoRD.Infrastructure.CrossCutting.Security;
 using TuColmadoRD.Infrastructure.CrossCutting.Tenancy;
 
 namespace TuColmadoRD.Infrastructure.CrossCutting;
@@ -19,6 +20,16 @@ public static class ServiceRegistration
 
         services.AddSingleton<IConnectionMonitor, ConnectionMonitor>();
         services.AddHostedService<ConnectionMonitorHostedService>();
+
+        services.AddScoped<TuColmadoRD.Core.Application.Interfaces.Security.ITimeGuard, TimeGuardService>();
+        services.AddScoped<TuColmadoRD.Core.Application.Interfaces.Security.ILicenseVerifier, LicenseVerifierService>();
+
+        var applicationAssembly = typeof(TuColmadoRD.Core.Application.Behaviors.ICommandMarker).Assembly;
+        services.AddMediatR(cfg =>
+        {
+            cfg.RegisterServicesFromAssembly(applicationAssembly);
+            cfg.AddBehavior(typeof(MediatR.IPipelineBehavior<,>), typeof(TuColmadoRD.Core.Application.Behaviors.ClockAdvancePipelineBehavior<,>));
+        });
 
         return services;
     }
@@ -37,6 +48,7 @@ public static class ServiceRegistration
         services.Configure<LocalDeviceOptions>(configuration.GetSection("LocalDevice"));
         services.AddSingleton<LocalDeviceTenantProvider>();
         services.AddSingleton<ITenantProvider>(sp => sp.GetRequiredService<LocalDeviceTenantProvider>());
+        services.AddSingleton<IDeviceIdentityStore>(sp => sp.GetRequiredService<LocalDeviceTenantProvider>());
         services.AddHttpClient<DevicePairingService>(client =>
         {
             var authBaseUrl = configuration["AuthApi:BaseUrl"]

@@ -11,7 +11,7 @@ using TuColmadoRD.Core.Domain.ValueObjects.Base;
 
 namespace TuColmadoRD.Infrastructure.CrossCutting.Tenancy;
 
-public sealed class LocalDeviceTenantProvider : ITenantProvider
+public sealed class LocalDeviceTenantProvider : ITenantProvider, IDeviceIdentityStore
 {
     private readonly LocalDeviceOptions _options;
     private DeviceIdentity? _cached;
@@ -105,9 +105,4 @@ public sealed class LocalDeviceTenantProvider : ITenantProvider
         cs.CopyTo(result);
         return result.ToArray();
     }
-}
-
-public readonly record struct Unit
-{
-    public static readonly Unit Value = default;
 }

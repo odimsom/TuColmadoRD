@@ -4,5 +4,6 @@ public sealed record DeviceIdentity(
     Guid TenantId,
     Guid TerminalId,
     string PublicLicenseKey,
-    DateTimeOffset PairedAt
+    DateTimeOffset PairedAt,
+    string? LicenseToken = null
 );
