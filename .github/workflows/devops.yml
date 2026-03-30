@@ -7,6 +7,10 @@ on:
       - QA
       - master
     types: [opened, synchronize, closed]
+  push:
+    branches:
+      - QA
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -47,14 +51,14 @@ jobs:
           fetch-depth: 0
       - name: Auto-propagate to QA
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           gh pr create --base QA --head Develop --title "Auto-merge Develop to QA" --body "Automated promotion" || true
           gh pr merge Develop --auto --merge || true
 
   deploy_to_server:
     needs: test
-    if: always() && !failure() && !cancelled() && github.event.pull_request.merged == true && github.base_ref == 'QA'
+    if: always() && !failure() && !cancelled() && ((github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.base_ref == 'QA') || (github.event_name == 'push' && github.ref == 'refs/heads/QA') || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     steps:
       - name: Deploy via SSH
@@ -102,7 +106,7 @@ jobs:
           fetch-depth: 0
       - name: Promote to Master only after successful deploy
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
           gh pr create --base master --head QA --title "Auto-merge QA to Master" --body "Automated promotion after successful deploy" || true
           gh pr merge QA --auto --merge || true
