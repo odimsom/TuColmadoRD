@@ -112,6 +112,9 @@ public static class ServiceRegistration
         services.AddScoped<ISaleRepository, SaleRepository>();
         services.AddScoped<ISaleDetailRepository, SaleDetailRepository>();
         services.AddScoped<IShiftRepository, ShiftRepository>();
+        services.AddScoped<TuColmadoRD.Core.Application.Sales.Abstractions.ISaleRepository, SaleRepository>();
+        services.AddScoped<TuColmadoRD.Core.Application.Sales.Abstractions.ISaleService, TuColmadoRD.Core.Application.Sales.Queries.SaleService>();
+        services.AddScoped<TuColmadoRD.Core.Application.Sales.Abstractions.ISaleSequenceService, SaleSequenceService>();
         services.AddScoped<TuColmadoRD.Core.Application.Sales.Abstractions.IShiftRepository, ShiftRepository>();
         services.AddScoped<TuColmadoRD.Core.Application.Sales.Abstractions.IShiftReadRepository, ShiftReadRepository>();
         services.AddScoped<TuColmadoRD.Core.Application.Sales.Abstractions.ICurrentShiftService, CurrentShiftService>();
