@@ -2,7 +2,7 @@ namespace TuColmadoRD.Presentation.API.Endpoints.Sales;
 
 public sealed record CreateSaleItemRequest(Guid ProductId, decimal Quantity);
 
-public sealed record CreateSalePaymentRequest(int PaymentMethodId, decimal Amount, string? Reference);
+public sealed record CreateSalePaymentRequest(int PaymentMethodId, decimal Amount, string? Reference, Guid? CustomerId);
 
 public sealed record CreateSaleRequest(
     IReadOnlyList<CreateSaleItemRequest> Items,
@@ -44,6 +44,7 @@ public sealed record SalePaymentResponse(
     int PaymentMethodId,
     decimal Amount,
     string? Reference,
+    Guid? CustomerId,
     DateTime ReceivedAt);
 
 public sealed record SaleDetailResponse(

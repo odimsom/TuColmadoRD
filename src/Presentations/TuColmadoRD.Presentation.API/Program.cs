@@ -1,5 +1,6 @@
 using TuColmadoRD.Infrastructure.CrossCutting.Security;
 using TuColmadoRD.Infrastructure.IOC.ServiceRegistrations;
+using TuColmadoRD.Presentation.API.Endpoints.Customers;
 using TuColmadoRD.Presentation.API.Endpoints.Inventory;
 using TuColmadoRD.Presentation.API.Endpoints.Sales;
 using TuColmadoRD.Presentation.API.Endpoints.Sales.Shifts;
@@ -29,6 +30,7 @@ app.UseHttpsRedirection();
 app.UseMiddleware<SubscriptionGuardMiddleware>();
 
 app.MapInventoryEndpoints();
+app.MapCustomerEndpoints();
 app.MapSalesEndpoints();
 app.MapShiftEndpoints();
 

@@ -18,7 +18,8 @@ public sealed record SaleItemRequest(
 public sealed record SalePaymentRequest(
     int PaymentMethodId,
     decimal Amount,
-    string? Reference);
+    string? Reference,
+    Guid? CustomerId);
 
 /// <summary>
 /// Result item from sale creation.

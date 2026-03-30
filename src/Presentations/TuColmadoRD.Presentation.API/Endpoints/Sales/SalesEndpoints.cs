@@ -40,7 +40,7 @@ public static class SalesEndpoints
     {
         var command = new CreateSaleCommand(
             request.Items.Select(i => new SaleItemRequest(i.ProductId, i.Quantity)).ToList(),
-            request.Payments.Select(p => new SalePaymentRequest(p.PaymentMethodId, p.Amount, p.Reference)).ToList(),
+            request.Payments.Select(p => new SalePaymentRequest(p.PaymentMethodId, p.Amount, p.Reference, p.CustomerId)).ToList(),
             request.Notes);
 
         var result = await mediator.Send(command, ct);
@@ -127,6 +127,7 @@ public static class SalesEndpoints
                 p.PaymentMethodId,
                 p.AmountValue,
                 p.Reference,
+                p.CustomerId,
                 p.ReceivedAt)).ToList());
 
         return TypedResults.Ok(response);

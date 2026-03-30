@@ -32,6 +32,11 @@ public sealed class SalePayment
     public string? Reference { get; set; }
 
     /// <summary>
+    /// Customer linked to a credit payment.
+    /// </summary>
+    public Guid? CustomerId { get; set; }
+
+    /// <summary>
     /// When payment was received (UTC).
     /// </summary>
     public DateTime ReceivedAt { get; set; }
@@ -48,11 +53,13 @@ public sealed class SalePayment
     public SalePayment(
         PaymentMethod method,
         decimal amount,
-        string? reference)
+        string? reference,
+        Guid? customerId)
     {
         PaymentMethodId = method.Id;
         AmountValue = amount;
         Reference = reference;
+        CustomerId = customerId;
         ReceivedAt = DateTime.UtcNow;
     }
 }

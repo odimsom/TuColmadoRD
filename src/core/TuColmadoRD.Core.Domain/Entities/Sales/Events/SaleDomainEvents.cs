@@ -1,3 +1,5 @@
+using MediatR;
+
 namespace TuColmadoRD.Core.Domain.Entities.Sales.Events;
 
 /// <summary>
@@ -17,7 +19,8 @@ public sealed record SaleItemEventLine(
 public sealed record SalePaymentEventLine(
     int PaymentMethodId,
     decimal Amount,
-    string? Reference);
+    string? Reference,
+    Guid? CustomerId);
 
 /// <summary>
 /// Domain event raised when a sale is completed and finalized.
@@ -36,7 +39,7 @@ public sealed record SaleCompletedDomainEvent(
     decimal ChangeDue,
     IReadOnlyList<SaleItemEventLine> Items,
     IReadOnlyList<SalePaymentEventLine> Payments,
-    DateTime OccurredAt);
+    DateTime OccurredAt) : INotification;
 
 /// <summary>
 /// Domain event raised when a sale is voided/cancelled.

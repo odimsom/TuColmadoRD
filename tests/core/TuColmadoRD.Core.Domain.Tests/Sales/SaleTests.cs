@@ -70,6 +70,17 @@ public class SaleTests
     }
 
     [Fact]
+    public void AddPayment_WithCreditAndNoCustomerId_ReturnsValidationError()
+    {
+        var sale = CreateSale().Result;
+
+        var result = sale.AddPayment(PaymentMethod.Credit, Money.FromDecimal(100m).Result, null);
+
+        result.IsGood.Should().BeFalse();
+        result.Error.Code.Should().Be("sale.credit_payment_customer_required");
+    }
+
+    [Fact]
     public void Void_WithValidReason_ChangesStatusAndRaisesEvent()
     {
         var sale = CreateSale().Result;
