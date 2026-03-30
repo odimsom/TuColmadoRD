@@ -53,7 +53,7 @@ jobs:
           gh pr merge Develop --auto --merge || true
 
   deploy_to_server:
-    needs: integrate_to_qa
+    needs: test
     if: always() && !failure() && !cancelled() && github.event.pull_request.merged == true && github.base_ref == 'QA'
     runs-on: ubuntu-latest
     steps:
