@@ -131,7 +131,7 @@ public sealed class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand
             if (!moneyResult.TryGetResult(out var amount) || amount is null)
                 return OperationResult<CreateSaleResult, DomainError>.Bad(moneyResult.Error);
 
-            var addPaymentResult = sale.AddPayment(method, amount, paymentRequest.Reference);
+            var addPaymentResult = sale.AddPayment(method, amount, paymentRequest.Reference, paymentRequest.CustomerId);
             if (!addPaymentResult.IsGood)
                 return OperationResult<CreateSaleResult, DomainError>.Bad(addPaymentResult.Error);
         }
@@ -159,7 +159,8 @@ public sealed class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand
         var paymentPayloadLines = sale.Payments.Select(p => new SalePaymentPayloadLine(
             p.PaymentMethodId,
             p.AmountValue,
-            p.Reference
+            p.Reference,
+            p.CustomerId
         )).ToList();
 
         var saleCreatedPayload = new SaleCreatedPayload(

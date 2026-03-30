@@ -26,7 +26,7 @@ public class SaleEntitiesTests
     [Fact]
     public void SalePayment_WhenCreated_SetsPaymentMethodAndAmount()
     {
-        var payment = new SalePayment(PaymentMethod.Card, 250m, "****1234");
+        var payment = new SalePayment(PaymentMethod.Card, 250m, "****1234", null);
 
         payment.PaymentMethodId.Should().Be(PaymentMethod.Card.Id);
         payment.AmountValue.Should().Be(250m);

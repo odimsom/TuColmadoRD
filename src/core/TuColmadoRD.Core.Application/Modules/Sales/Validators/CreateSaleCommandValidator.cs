@@ -28,6 +28,10 @@ public sealed class CreateSaleCommandValidator : AbstractValidator<CreateSaleCom
                 payment.RuleFor(p => p.PaymentMethodId).InclusiveBetween(1, 4);
                 payment.RuleFor(p => p.Amount).GreaterThan(0);
                 payment.RuleFor(p => p.Reference).MaximumLength(50).When(p => !string.IsNullOrEmpty(p.Reference));
+                payment.RuleFor(p => p.CustomerId)
+                    .NotEmpty()
+                    .When(p => p.PaymentMethodId == 4)
+                    .WithErrorCode("sale.credit_payment_customer_required");
             });
 
         RuleFor(x => x.Notes)

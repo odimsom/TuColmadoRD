@@ -138,7 +138,8 @@ public class Sale : ITenantEntity
     public OperationResult<Unit, DomainError> AddPayment(
         PaymentMethod method,
         Money amount,
-        string? reference)
+        string? reference,
+        Guid? customerId = null)
     {
         if (StatusId != SaleStatus.Completed.Id)
         {
@@ -150,7 +151,19 @@ public class Sale : ITenantEntity
             return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("sale.payment_amount_must_be_positive"));
         }
 
-        var payment = new SalePayment(method, amount.Amount, reference)
+        if (method.Id == PaymentMethod.Credit.Id && customerId is null)
+        {
+            return OperationResult<Unit, DomainError>.Bad(
+                DomainError.Validation("sale.credit_payment_customer_required", "El pago a credito requiere un cliente."));
+        }
+
+        if (customerId.HasValue && customerId.Value == Guid.Empty)
+        {
+            return OperationResult<Unit, DomainError>.Bad(
+                DomainError.Validation("sale.credit_payment_customer_invalid", "CustomerId no es valido."));
+        }
+
+        var payment = new SalePayment(method, amount.Amount, reference, customerId)
         {
             SaleId = Id
         };
@@ -192,7 +205,8 @@ public class Sale : ITenantEntity
         var paymentEventLines = _payments.Select(p => new SalePaymentEventLine(
             p.PaymentMethodId,
             p.AmountValue,
-            p.Reference)).ToList();
+            p.Reference,
+            p.CustomerId)).ToList();
 
         _domainEvents.Add(new SaleCompletedDomainEvent(
             Id,

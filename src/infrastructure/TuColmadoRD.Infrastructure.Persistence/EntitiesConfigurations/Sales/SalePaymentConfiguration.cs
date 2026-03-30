@@ -15,8 +15,10 @@ public sealed class SalePaymentConfiguration : IEntityTypeConfiguration<SalePaym
         builder.Property(p => p.PaymentMethodId).IsRequired();
         builder.Property(p => p.AmountValue).HasColumnType("decimal(18,2)").IsRequired();
         builder.Property(p => p.Reference).HasMaxLength(100);
+        builder.Property(p => p.CustomerId);
         builder.Property(p => p.ReceivedAt).IsRequired();
 
         builder.HasIndex(p => p.SaleId);
+        builder.HasIndex(p => p.CustomerId);
     }
 }

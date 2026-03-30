@@ -20,7 +20,8 @@ public sealed record SaleItemPayloadLine(
 public sealed record SalePaymentPayloadLine(
     int PaymentMethodId,
     decimal Amount,
-    string? Reference);
+    string? Reference,
+    Guid? CustomerId);
 
 /// <summary>
 /// Outbox payload when sale is created.
