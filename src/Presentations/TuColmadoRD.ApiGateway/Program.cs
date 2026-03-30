@@ -35,7 +35,7 @@ app.MapGet("/", async (HttpContext ctx) =>
 app.UseSwaggerUI(c =>
 {
     c.SwaggerEndpoint("/api-swagger/v1/swagger.json", ".NET API (TuColmadoRD)");
-    c.SwaggerEndpoint("/auth-swagger/v1/swagger.json", "Node.js Auth API");
+    c.SwaggerEndpoint("/auth-swagger/swagger.json", "Node.js Auth API");
     c.RoutePrefix = "swagger";
 });
 
