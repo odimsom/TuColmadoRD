@@ -9,97 +9,134 @@ public static class ShiftEndpoints
 {
     public static IEndpointRouteBuilder MapShiftEndpoints(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/sales/shifts")
+        var group = app.MapGroup("/api/v1/sales/shifts")
             .WithTags("Sales-Shifts")
             .RequireAuthorization();
 
-        group.MapPost("/open", async (OpenShiftRequest request, IMediator mediator, CancellationToken ct) =>
-        {
-            var command = new OpenShiftCommand(request.OpeningCashAmount, request.CashierName);
-            var result = await mediator.Send(command, ct);
-            if (!result.TryGetResult(out var shiftId))
-            {
-                return result.Error.MapDomainError();
-            }
+        group.MapPost("/open", OpenShift)
+            .WithName("OpenShift")
+            .WithOpenApi();
 
-            return TypedResults.Created($"/api/sales/shifts/{shiftId}", new OpenShiftResponse(shiftId));
-        });
+        group.MapPost("/{id:guid}/close", CloseShift)
+            .WithName("CloseShift")
+            .WithOpenApi();
 
-        group.MapPost("/{id:guid}/close", async (Guid id, CloseShiftRequest request, IMediator mediator, CancellationToken ct) =>
-        {
-            var command = new CloseShiftCommand(id, request.ActualCashAmount, request.Notes);
-            var result = await mediator.Send(command, ct);
-            if (!result.TryGetResult(out var closeResult) || closeResult is null)
-            {
-                return result.Error.MapDomainError();
-            }
+        group.MapGet("/current", GetCurrentShift)
+            .WithName("GetCurrentShift")
+            .WithOpenApi();
 
-            return TypedResults.Ok(new CloseShiftResponse(
-                closeResult.ShiftId,
-                closeResult.TotalSalesCount,
-                closeResult.TotalSalesAmount,
-                closeResult.ExpectedCashAmount,
-                closeResult.ActualCashAmount,
-                closeResult.CashDifference,
-                closeResult.ClosedAt));
-        });
+        group.MapGet("/{id:guid}", GetShiftById)
+            .WithName("GetShiftById")
+            .WithOpenApi();
 
-        group.MapGet("/current", async (IMediator mediator, CancellationToken ct) =>
-        {
-            var result = await mediator.Send(new GetCurrentShiftQuery(), ct);
-            if (!result.TryGetResult(out var shiftDto) || shiftDto is null)
-            {
-                return result.Error.MapDomainError();
-            }
-
-            return TypedResults.Ok(shiftDto);
-        });
-
-        group.MapGet("/{id:guid}", async (Guid id, IMediator mediator, CancellationToken ct) =>
-        {
-            var result = await mediator.Send(new GetShiftByIdQuery(id), ct);
-            if (!result.TryGetResult(out var shiftDto) || shiftDto is null)
-            {
-                return result.Error.MapDomainError();
-            }
-
-            return TypedResults.Ok(shiftDto);
-        });
-
-        group.MapGet("", async (
-            IMediator mediator,
-            int page = 1,
-            int pageSize = 20,
-            DateTime? from = null,
-            DateTime? to = null,
-            string status = "all",
-            CancellationToken ct = default) =>
-        {
-            pageSize = Math.Min(Math.Max(pageSize, 1), 100);
-            page = Math.Max(page, 1);
-
-            var statusFilter = status.ToLowerInvariant() switch
-            {
-                "open" => ShiftStatusFilter.Open,
-                "closed" => ShiftStatusFilter.Closed,
-                _ => ShiftStatusFilter.All
-            };
-
-            var query = new GetShiftsPagedQuery(page, pageSize, from, to, statusFilter);
-            var result = await mediator.Send(query, ct);
-            if (!result.TryGetResult(out var paged) || paged is null)
-            {
-                return result.Error.MapDomainError();
-            }
-
-            return TypedResults.Ok(new PagedShiftResponse(
-                paged.Items,
-                paged.Page,
-                paged.PageSize,
-                paged.TotalCount,
-                paged.TotalPages));
-        });
+        group.MapGet("", GetShiftsPaged)
+            .WithName("GetShiftsPaged")
+            .WithOpenApi();
 
         return app;
+    }
+
+    private static async Task<IResult> OpenShift(
+        OpenShiftRequest request,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new OpenShiftCommand(request.OpeningCashAmount, request.CashierName);
+        var result = await mediator.Send(command, ct);
+        
+        if (!result.TryGetResult(out var shiftId))
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Created($"/api/v1/sales/shifts/{shiftId}", new OpenShiftResponse(shiftId));
+    }
+
+    private static async Task<IResult> CloseShift(
+        Guid id,
+        CloseShiftRequest request,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new CloseShiftCommand(id, request.ActualCashAmount, request.Notes);
+        var result = await mediator.Send(command, ct);
+        
+        if (!result.TryGetResult(out var closeResult) || closeResult is null)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Ok(new CloseShiftResponse(
+            closeResult.ShiftId,
+            closeResult.TotalSalesCount,
+            closeResult.TotalSalesAmount,
+            closeResult.ExpectedCashAmount,
+            closeResult.ActualCashAmount,
+            closeResult.CashDifference,
+            closeResult.ClosedAt));
+    }
+
+    private static async Task<IResult> GetCurrentShift(
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetCurrentShiftQuery(), ct);
+        
+        if (!result.TryGetResult(out var shiftDto) || shiftDto is null)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Ok(shiftDto);
+    }
+
+    private static async Task<IResult> GetShiftById(
+        Guid id,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetShiftByIdQuery(id), ct);
+        
+        if (!result.TryGetResult(out var shiftDto) || shiftDto is null)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Ok(shiftDto);
+    }
+
+    private static async Task<IResult> GetShiftsPaged(
+        IMediator mediator,
+        int page = 1,
+        int pageSize = 20,
+        DateTime? from = null,
+        DateTime? to = null,
+        string status = "all",
+        CancellationToken ct = default)
+    {
+        pageSize = Math.Min(Math.Max(pageSize, 1), 100);
+        page = Math.Max(page, 1);
+
+        var statusFilter = status.ToLowerInvariant() switch
+        {
+            "open" => ShiftStatusFilter.Open,
+            "closed" => ShiftStatusFilter.Closed,
+            _ => ShiftStatusFilter.All
+        };
+
+        var query = new GetShiftsPagedQuery(page, pageSize, from, to, statusFilter);
+        var result = await mediator.Send(query, ct);
+        
+        if (!result.TryGetResult(out var paged) || paged is null)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Ok(new PagedShiftResponse(
+            paged.Items,
+            paged.Page,
+            paged.PageSize,
+            paged.TotalCount,
+            paged.TotalPages));
     }
 }

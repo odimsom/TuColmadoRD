@@ -10,7 +10,13 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
 {
     public class SaleDetail
     {
-    private SaleDetail() { }
+        private SaleDetail()
+        {
+            Quantity = Quantity.Of(1m).Result;
+            UnitPrice = Money.Zero;
+            TaxAmount = Money.Zero;
+            SubTotal = Money.Zero;
+        }
         public Guid Id { get; private set; }
         public Guid SaleId { get; private set; }
         public Guid ProductId { get; private set; }
