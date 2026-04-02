@@ -7,4 +7,5 @@ namespace TuColmadoRD.Core.Domain.Interfaces.Repositories.Customers;
 
 public interface ICustomerAccountRepository : IGenericRepository<CustomerAccount>
 {
+    Task<CustomerAccount?> GetByCustomerIdAsync(Guid customerId, CancellationToken cancellationToken = default);
 }

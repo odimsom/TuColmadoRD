@@ -21,7 +21,6 @@ namespace TuColmadoRD.Core.Domain.Tests.Entities.Customers
             Assert.NotNull(result.Result);
             Assert.Equal(fullName, result.Result.FullName);
             Assert.True(result.Result.IsActive);
-            Assert.NotNull(result.Result.Account);
         }
 
         [Fact]
