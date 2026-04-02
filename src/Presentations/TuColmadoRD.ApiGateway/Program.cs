@@ -1,7 +1,9 @@
 using System.Text;
+using TuColmadoRD.ApiGateway.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddMemoryCache();
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
@@ -39,6 +41,4 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
-app.MapReverseProxy();
-
-app.Run();
+app.UseMiddleware<IdempotencyMiddleware>();

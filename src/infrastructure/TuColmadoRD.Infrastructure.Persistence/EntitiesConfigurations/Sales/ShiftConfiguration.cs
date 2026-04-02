@@ -38,7 +38,34 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
             .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
             .HasColumnType("decimal(18,2)")
             .IsRequired();
+        builder.Property(s => s.TotalExpenses)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
 
+        builder.Property(s => s.TotalCashSales)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+        builder.Property(s => s.TotalAccountPayments)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+
+        builder.Property(s => s.TotalCashIn)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+
+        builder.Property(s => s.TotalCardIn)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+
+        builder.Property(s => s.TotalTransferIn)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
         builder.Property(s => s.ClosingCashAmount)
             .HasConversion(v => v == null ? (decimal?)null : v.Amount, v => v == null ? null : Money.FromDecimal(v.Value).Result)
             .HasColumnType("decimal(18,2)")

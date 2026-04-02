@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TuColmadoRD.Core.Domain.Entities.Purchasing;
 
@@ -11,23 +11,18 @@ public class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         builder.ToTable("Suppliers");
         builder.HasKey(s => s.Id);
 
-        builder.OwnsOne(s => s.TenantId, b => 
+        builder.OwnsOne(s => s.TenantId, b =>
         {
-            b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();
+            b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();    
         });
 
-        builder.Property(s => s.BusinessName).IsRequired().HasMaxLength(150);
+        builder.Property(s => s.Name).IsRequired().HasMaxLength(150);   
 
-        builder.OwnsOne(s => s.TaxId, b => 
+        builder.OwnsOne(s => s.Rnc, b =>
         {
-            b.Property(r => r.Value).HasColumnName("TaxId").HasMaxLength(15);
+            b.Property(r => r.Value).HasColumnName("Rnc").HasMaxLength(15);   
         });
 
-        builder.Property(s => s.Type).IsRequired().HasConversion<string>();
-
-        builder.OwnsOne(s => s.ContactPhone, b => 
-        {
-            b.Property(p => p.Value).HasColumnName("ContactPhone").HasMaxLength(20);
-        });
+        builder.Property(s => s.Type).IsRequired().HasConversion<string>();     
     }
 }
