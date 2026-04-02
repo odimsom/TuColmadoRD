@@ -1,13 +1,20 @@
 using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
+using TuColmadoRD.Core.Domain.Entities.Customers.Events;
 using TuColmadoRD.Core.Domain.Enums.Customers;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using System.Collections.Generic;
 
 namespace TuColmadoRD.Core.Domain.Entities.Customers
 {
     public class CustomerAccount : ITenantEntity
     {
-    private CustomerAccount() { }
+        private readonly List<object> _domainEvents = [];
+        public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
+
+        private readonly List<DebtTransaction> _transactions = [];
+        public IReadOnlyCollection<DebtTransaction> Transactions => _transactions.AsReadOnly();
+
         public Guid Id { get; private set; }
         public TenantIdentifier TenantId { get; private set; }
         public Guid CustomerId { get; private set; }
@@ -29,53 +36,84 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
             }
         }
 
-        private CustomerAccount(TenantIdentifier tenantId, Guid customerId)
+        private CustomerAccount() { }
+
+        private CustomerAccount(TenantIdentifier tenantId, Guid customerId, Money creditLimit)
         {
             Id = Guid.NewGuid();
             TenantId = tenantId;
             CustomerId = customerId;
             Balance = Money.Zero;
-            CreditLimit = Money.FromDecimal(5000).Result!;
+            CreditLimit = creditLimit;
             LastActivity = DateTime.UtcNow;
         }
 
-        internal static CustomerAccount CreateNew(TenantIdentifier tenantId, Guid customerId)
+        public static OperationResult<CustomerAccount, string> Create(TenantIdentifier tenantId, Guid customerId, Money creditLimit)
         {
-            return new CustomerAccount(tenantId, customerId);
+            if (creditLimit.Amount < 0)
+                return OperationResult<CustomerAccount, string>.Bad("El lï¿½mite de crï¿½dito no puede ser negativo.");
+
+            return OperationResult<CustomerAccount, string>.Good(new CustomerAccount(tenantId, customerId, creditLimit));
         }
 
         /// <summary>
-        /// Incrementa la deuda (Fiao).
+        /// Incrementa la deuda (Fiao) creando una transacciï¿½n.
         /// </summary>
-        public OperationResult<bool, string> RecordDebt(Money amount)
+        public OperationResult<bool, string> RecordCharge(Money amount, Guid terminalId, string concept, string? receiptReference = null)
         {
             var projectedBalance = Balance + amount;
 
             if (projectedBalance.Amount > CreditLimit.Amount)
             {
                 return OperationResult<bool, string>.Bad(
-                    $"Operación rechazada: El límite de crédito es {CreditLimit} y el nuevo balance sería {projectedBalance}.");
+                    $"Operaciï¿½n rechazada: El lï¿½mite de crï¿½dito es {CreditLimit} y el nuevo balance de {projectedBalance} lo excederï¿½a.");
             }
 
+            var transactionResult = DebtTransaction.Create(
+                TenantId, Id, terminalId, amount, TransactionType.Charge, concept, receiptReference);
+
+            if (!transactionResult.IsGood)
+                return OperationResult<bool, string>.Bad(transactionResult.Error!);
+
+            var transaction = transactionResult.Result!;
+            _transactions.Add(transaction);
+            
             Balance = projectedBalance;
             LastActivity = DateTime.UtcNow;
+
+            AddDomainEvent(new ChargeRegisteredDomainEvent(
+                Id, TenantId, CustomerId, amount, Balance, transaction.Id, transaction.CreatedAt));
+
             return OperationResult<bool, string>.Good(true);
         }
 
         /// <summary>
-        /// Registra un abono (Pagar la libreta).
+        /// Registra un abono (Pagar la libreta) creando una transacciï¿½n.
         /// </summary>
-        public OperationResult<bool, string> RecordPayment(Money payment)
+        public OperationResult<bool, string> RecordPayment(Money amount, Guid terminalId, string concept, string? receiptReference = null)
         {
-            var result = Balance - payment;
+            var newBalanceResult = Balance - amount;
 
-            if (!result.IsGood)
+            if (!newBalanceResult.IsGood)
             {
-                return OperationResult<bool, string>.Bad($"Error en abono: {result.Error}");
+                return OperationResult<bool, string>.Bad($"Error calculando nuevo balance: {newBalanceResult.Error}");
             }
 
-            Balance = result.Result!;
+            var transactionResult = DebtTransaction.Create(
+                TenantId, Id, terminalId, amount, TransactionType.Credit, concept, receiptReference);
+
+            if (!transactionResult.IsGood)
+                return OperationResult<bool, string>.Bad(transactionResult.Error!);
+
+            var transaction = transactionResult.Result!;
+            _transactions.Add(transaction);
+
+            Balance = newBalanceResult.Result!;
             LastActivity = DateTime.UtcNow;
+
+            AddDomainEvent(new PaymentRegisteredDomainEvent(
+                Id, TenantId, CustomerId, amount, Balance, transaction.Id, transaction.CreatedAt));
+
             return OperationResult<bool, string>.Good(true);
         }
 
@@ -84,5 +122,8 @@ namespace TuColmadoRD.Core.Domain.Entities.Customers
             CreditLimit = newLimit;
             LastActivity = DateTime.UtcNow;
         }
+
+        public void ClearDomainEvents() => _domainEvents.Clear();
+        private void AddDomainEvent(object @event) => _domainEvents.Add(@event);
     }
 }
