@@ -36,6 +36,9 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         public int TotalSalesCount { get; private set; }
         public Money TotalSalesAmount { get; private set; }
 
+        public Money TotalExpenses { get; private set; } = Money.Zero;
+        public Money TotalCashSales { get; private set; } = Money.Zero;
+
         public Money TotalAccountPayments { get; private set; } = Money.Zero;   
         public Money TotalCashIn { get; private set; } = Money.Zero;
         public Money TotalCardIn { get; private set; } = Money.Zero;
@@ -158,6 +161,29 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
 
             return OperationResult<Unit, DomainError>.Good(Unit.Value);
         }
+        public OperationResult<Unit, DomainError> RegisterExpense(Money amount)
+        {
+            if (Status != ShiftStatus.Open)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Business("shift.closed_cannot_register_expense"));
+            }
+
+            if (amount.Amount <= 0)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.expense_amount_invalid"));
+            }
+
+            var availableCash = OpeningCashAmount.Amount + TotalCashIn.Amount + TotalCashSales.Amount - TotalExpenses.Amount;
+            if (amount.Amount > availableCash)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Business("shift.insufficient_cash", "No hay suficiente efectivo en caja para registrar este gasto."));
+            }
+
+            TotalExpenses += amount;
+
+            return OperationResult<Unit, DomainError>.Good(Unit.Value);
+        }
+
         public OperationResult<Unit, DomainError> RegisterAccountPayment(Money amount, PaymentMethod method)
         {
             if (Status != ShiftStatus.Open)
