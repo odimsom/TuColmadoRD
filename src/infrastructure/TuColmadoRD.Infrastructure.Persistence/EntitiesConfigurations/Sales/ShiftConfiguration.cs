@@ -38,6 +38,15 @@ public class ShiftConfiguration : IEntityTypeConfiguration<Shift>
             .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)
             .HasColumnType("decimal(18,2)")
             .IsRequired();
+        builder.Property(s => s.TotalExpenses)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
+
+        builder.Property(s => s.TotalCashSales)
+            .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
+            .HasColumnType("decimal(18,2)")
+            .IsRequired();
         builder.Property(s => s.TotalAccountPayments)
             .HasConversion(v => v.Amount, v => Money.FromDecimal(v).Result)     
             .HasColumnType("decimal(18,2)")
