@@ -41,7 +41,7 @@ public static class SalesEndpoints
         CancellationToken ct)
     {
         var commandItems = request.Items.Select(i => new ApplicationSaleItemRequest(i.ProductId, i.Quantity)).ToList();
-        var commandPayments = request.Payments.Select(p => new ApplicationSalePaymentRequest(p.PaymentMethodId, p.Amount, p.Reference, null)).ToList();
+        var commandPayments = request.Payments.Select(p => new ApplicationSalePaymentRequest(p.PaymentMethodId, p.Amount, p.Reference, p.CustomerId)).ToList();
         
         var command = new CreateSaleCommand(commandItems, commandPayments, request.Notes);
 
