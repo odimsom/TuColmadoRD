@@ -44,6 +44,10 @@ public static class InventoryEndpoints
             .WithName("GetProductsPaged")
             .WithOpenApi();
 
+        group.MapGet("/catalog", GetCatalog)
+            .WithName("GetCatalog")
+            .WithOpenApi();
+
         return app;
     }
 
@@ -152,5 +156,18 @@ public static class InventoryEndpoints
         }
 
         return TypedResults.Ok(dto);
+    }
+
+    private static async Task<IResult> GetCatalog(
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var result = await mediator.Send(new GetCatalogQuery(), ct);
+        if (!result.TryGetResult(out var dtos))
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Ok(dtos);
     }
 }

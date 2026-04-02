@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using TuColmadoRD.Core.Domain.Entities.Purchasing;
 
@@ -11,17 +11,15 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
         builder.ToTable("PurchaseOrders");
         builder.HasKey(po => po.Id);
 
-        builder.OwnsOne(po => po.TenantId, b => 
+        builder.OwnsOne(po => po.TenantId, b =>
         {
-            b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();
+            b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();    
         });
 
-        builder.Property(po => po.Status).IsRequired().HasConversion<string>();
+        builder.Property(po => po.Status).IsRequired().HasConversion<string>(); 
 
-        builder.OwnsOne(po => po.TotalAmount, b => 
-        {
-            b.Property(m => m.Amount).HasColumnName("TotalAmount").HasColumnType("decimal(18,2)").IsRequired();
-        });
+        builder.Property(po => po.TotalAmount).HasColumnType("decimal(18,2)").IsRequired();
+        builder.Property(po => po.SupplierNcf).HasMaxLength(20);
 
         builder.HasOne<Supplier>()
             .WithMany()
@@ -32,5 +30,8 @@ public class PurchaseOrderConfiguration : IEntityTypeConfiguration<PurchaseOrder
             .WithOne()
             .HasForeignKey(d => d.PurchaseOrderId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Metadata.FindNavigation(nameof(PurchaseOrder.Details))!
+               .SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }

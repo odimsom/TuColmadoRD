@@ -5,6 +5,7 @@ using TuColmadoRD.Presentation.API.Endpoints.Expenses;
 using TuColmadoRD.Presentation.API.Endpoints.Inventory;
 using TuColmadoRD.Presentation.API.Endpoints.Sales;
 using TuColmadoRD.Presentation.API.Endpoints.Sales.Shifts;
+using TuColmadoRD.Presentation.API.Endpoints.Purchasing;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,7 @@ builder.Services.AddAuthorization();
 
 // Services registrations
 builder.Services.AddGlobalServices(builder.Configuration);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 var app = builder.Build();
 
@@ -31,6 +33,7 @@ app.UseHttpsRedirection();
 app.UseMiddleware<SubscriptionGuardMiddleware>();
 
 app.MapInventoryEndpoints();
+app.MapPurchasingEndpoints();
 app.MapCustomerEndpoints();
 app.MapExpenseEndpoints();
 app.MapSalesEndpoints();

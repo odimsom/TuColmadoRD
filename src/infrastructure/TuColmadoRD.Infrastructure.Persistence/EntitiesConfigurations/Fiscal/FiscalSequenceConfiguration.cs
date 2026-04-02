@@ -16,7 +16,7 @@ public class FiscalSequenceConfiguration : IEntityTypeConfiguration<FiscalSequen
             b.Property(t => t.Value).HasColumnName("TenantId").IsRequired();
         });
 
-        builder.Property(fs => fs.Type).IsRequired().HasConversion<int>();
+
         builder.Property(fs => fs.Prefix).IsRequired().HasMaxLength(5);
     }
 }
