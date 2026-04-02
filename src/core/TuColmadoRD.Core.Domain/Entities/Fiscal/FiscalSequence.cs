@@ -1,54 +1,73 @@
-using TuColmadoRD.Core.Domain.Base;
+ï»¿using TuColmadoRD.Core.Domain.Base;
 using TuColmadoRD.Core.Domain.Base.Result;
-using TuColmadoRD.Core.Domain.Enums.Fiscal;
+using TuColmadoRD.Core.Domain.Entities.Fiscal.Events;
 using TuColmadoRD.Core.Domain.ValueObjects;
+using TuColmadoRD.Core.Domain.ValueObjects.Base;
 
-namespace TuColmadoRD.Core.Domain.Entities.Fiscal
+namespace TuColmadoRD.Core.Domain.Entities.Fiscal;
+
+public class FiscalSequence : ITenantEntity
 {
-    public class FiscalSequence : ITenantEntity
+    private readonly List<object> _domainEvents = [];
+    public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
+
+    public Guid Id { get; private set; }
+    public TenantIdentifier TenantId { get; private set; }
+    public string Prefix { get; private set; }
+    public int CurrentSequence { get; private set; }
+    public int EndSequence { get; private set; }
+    public DateTime ValidUntil { get; private set; }
+    public bool IsActive { get; private set; }
+
+    private FiscalSequence()
     {
-    private FiscalSequence() { }
-        public Guid Id { get; private set; }
-        public TenantIdentifier TenantId { get; private set; }
+        Prefix = string.Empty;
+        TenantId = null!;
+    }
 
-        public FiscalReceiptType Type { get; private set; }
-        public string Prefix { get; private set; }
-        public long CurrentNumber { get; private set; }
-        public long EndNumber { get; private set; }
-        public DateTime ExpirationDate { get; private set; }
-        public bool IsActive { get; private set; }
+    private FiscalSequence(TenantIdentifier tenantId, string prefix, int start, int end, DateTime validUntil)
+    {
+        Id = Guid.NewGuid();
+        TenantId = tenantId;
+        Prefix = prefix;
+        CurrentSequence = start;
+        EndSequence = end;
+        ValidUntil = validUntil;
+        IsActive = true;
+    }
 
-        private FiscalSequence(TenantIdentifier tenantId, FiscalReceiptType type, string prefix, long start, long end, DateTime expiration)
-        {
-            Id = Guid.NewGuid();
-            TenantId = tenantId;
-            Type = type;
-            Prefix = prefix;
-            CurrentNumber = start;
-            EndNumber = end;
-            ExpirationDate = expiration;
-            IsActive = true;
-        }
+    public static OperationResult<FiscalSequence, DomainError> Create(
+        TenantIdentifier tenantId, string prefix, int start, int end, DateTime validUntil)
+    {
+        if (end <= start)
+            return OperationResult<FiscalSequence, DomainError>.Bad(DomainError.Validation("FiscalSequence.InvalidRange", "El nÃºmero final debe ser mayor al inicial."));
 
-        public static OperationResult<FiscalSequence, string> Create(
-            TenantIdentifier tenantId, FiscalReceiptType type, string prefix, long start, long end, DateTime expiration)
-        {
-            if (end <= start) return OperationResult<FiscalSequence, string>.Bad("El número final debe ser mayor al inicial.");
-            if (expiration.ToUniversalTime() <= DateTime.UtcNow) return OperationResult<FiscalSequence, string>.Bad("La secuencia ya está vencida.");
+        if (validUntil.ToUniversalTime() <= DateTime.UtcNow)
+            return OperationResult<FiscalSequence, DomainError>.Bad(DomainError.Validation("FiscalSequence.Expired", "La secuencia ya estÃ¡ vencida."));
 
-            return OperationResult<FiscalSequence, string>.Good(new FiscalSequence(tenantId, type, prefix, start, end, expiration.ToUniversalTime()));
-        }
+        return OperationResult<FiscalSequence, DomainError>.Good(new FiscalSequence(tenantId, prefix, start, end, validUntil.ToUniversalTime()));
+    }
 
-        public OperationResult<string, string> GetNextFullNumber()
-        {
-            if (!IsActive) return OperationResult<string, string>.Bad("Secuencia inactiva.");
-            if (CurrentNumber > EndNumber) return OperationResult<string, string>.Bad("Secuencia agotada.");
-            if (DateTime.UtcNow > ExpirationDate) return OperationResult<string, string>.Bad("Secuencia vencida.");
+    public OperationResult<string, DomainError> GetNextNcf()
+    {
+        if (!IsActive)
+            return OperationResult<string, DomainError>.Bad(DomainError.Validation("FiscalSequence.Inactive", "Secuencia fiscal inactiva."));
 
-            string fullNumber = $"{Prefix}{(int)Type:D2}{CurrentNumber:D8}";
-            CurrentNumber++;
+        if (DateTime.UtcNow > ValidUntil)
+            return OperationResult<string, DomainError>.Bad(DomainError.Validation("FiscalSequence.Expired", "Secuencia fiscal vencida."));
 
-            return OperationResult<string, string>.Good(fullNumber);
-        }
+        if (CurrentSequence > EndSequence)
+            return OperationResult<string, DomainError>.Bad(DomainError.Validation("FiscalSequence.Exhausted", "Secuencia fiscal agotada."));
+
+        string fullNumber = $"{Prefix}{CurrentSequence:D8}";
+        CurrentSequence++;
+
+        _domainEvents.Add(new FiscalSequenceConsumedDomainEvent(
+            Id,
+            TenantId,
+            fullNumber,
+            DateTime.UtcNow));
+
+        return OperationResult<string, DomainError>.Good(fullNumber);
     }
 }
