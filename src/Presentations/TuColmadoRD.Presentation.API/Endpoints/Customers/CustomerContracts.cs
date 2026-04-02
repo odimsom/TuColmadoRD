@@ -21,3 +21,8 @@ public sealed record CreateCustomerResponse(
     decimal CreditLimit,
     bool IsActive,
     DateTime CreatedAt);
+
+public sealed record RegisterPaymentRequest(
+    decimal Amount,
+    int PaymentMethodId,
+    string Concept);
