@@ -81,14 +81,17 @@ jobs:
               git checkout QA
               git pull origin QA
               docker compose down || true
+              docker rm -f tucolmadord-auth-1 tucolmadord-api-1 tucolmadord-gateway-1 tucolmadord-db-1 || true
               docker compose up -d --build --remove-orphans
             else
               git clone https://github.com/ODIMSOM/TuColmadoRD ~/TuColmadoRD
               cd ~/TuColmadoRD
               git checkout QA
               docker compose down || true
+              docker rm -f tucolmadord-auth-1 tucolmadord-api-1 tucolmadord-gateway-1 tucolmadord-db-1 || true
               docker compose up -d --build --remove-orphans
             fi
+            docker system prune -f
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
