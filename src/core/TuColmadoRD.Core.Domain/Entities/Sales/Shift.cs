@@ -35,6 +35,12 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
         public string? Notes { get; private set; }
         public int TotalSalesCount { get; private set; }
         public Money TotalSalesAmount { get; private set; }
+
+        public Money TotalAccountPayments { get; private set; } = Money.Zero;   
+        public Money TotalCashIn { get; private set; } = Money.Zero;
+        public Money TotalCardIn { get; private set; } = Money.Zero;
+        public Money TotalTransferIn { get; private set; } = Money.Zero;
+
         public IReadOnlyCollection<object> DomainEvents => _domainEvents.AsReadOnly();
 
         private Shift(Guid tenantId, Guid terminalId, Money openingCash, string cashierName)
@@ -152,7 +158,34 @@ namespace TuColmadoRD.Core.Domain.Entities.Sales
 
             return OperationResult<Unit, DomainError>.Good(Unit.Value);
         }
+        public OperationResult<Unit, DomainError> RegisterAccountPayment(Money amount, PaymentMethod method)
+        {
+            if (Status != ShiftStatus.Open)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Business("shift.closed_cannot_register_payment"));
+            }
 
+            if (amount.Amount <= 0)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.payment_amount_invalid"));
+            }
+
+            if (method == PaymentMethod.Credit)
+            {
+                return OperationResult<Unit, DomainError>.Bad(DomainError.Validation("shift.payment_cannot_be_credit"));
+            }
+
+            TotalAccountPayments += amount;
+
+            if (method == PaymentMethod.Cash)
+                TotalCashIn += amount;
+            else if (method == PaymentMethod.Card)
+                TotalCardIn += amount;
+            else if (method == PaymentMethod.Transfer)
+                TotalTransferIn += amount;
+
+            return OperationResult<Unit, DomainError>.Good(Unit.Value);
+        }
         public OperationResult<Unit, DomainError> ReverseSale(Money saleTotal)
         {
             if (Status != ShiftStatus.Open)
