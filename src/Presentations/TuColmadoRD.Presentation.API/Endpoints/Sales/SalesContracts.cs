@@ -1,12 +1,12 @@
 namespace TuColmadoRD.Presentation.API.Endpoints.Sales;
 
-public sealed record CreateSaleItemRequest(Guid ProductId, decimal Quantity);
+public sealed record SaleItemRequest(Guid ProductId, decimal Quantity);
 
-public sealed record CreateSalePaymentRequest(int PaymentMethodId, decimal Amount, string? Reference, Guid? CustomerId);
+public sealed record SalePaymentRequest(int PaymentMethodId, decimal Amount, string? Reference);
 
 public sealed record CreateSaleRequest(
-    IReadOnlyList<CreateSaleItemRequest> Items,
-    IReadOnlyList<CreateSalePaymentRequest> Payments,
+    IReadOnlyList<SaleItemRequest> Items,
+    IReadOnlyList<SalePaymentRequest> Payments,
     string? Notes);
 
 public sealed record CreateSaleResponse(
