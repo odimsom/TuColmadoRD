@@ -14,12 +14,13 @@ public static class CustomerEndpoints
             .RequireAuthorization();
 
         group.MapPost(string.Empty, CreateCustomer)
-            .WithName("CreateCustomer")
-            .WithOpenApi();
+            .WithName("CreateCustomer");
 
-        group.MapGet("/{customerId:guid}", GetCustomerById)
-            .WithName("GetCustomerById")
-            .WithOpenApi();
+        group.MapGet("/{id:guid}", GetCustomerById)
+            .WithName("GetCustomerById");
+
+        group.MapPost("/{id:guid}/payments", RegisterPayment)
+            .WithName("RegisterPayment");
 
         return app;
     }
@@ -61,16 +62,37 @@ public static class CustomerEndpoints
     }
 
     private static async Task<IResult> GetCustomerById(
-        Guid customerId,
+        Guid id,
         IMediator mediator,
         CancellationToken ct)
     {
-        var result = await mediator.Send(new GetCustomerByIdQuery(customerId), ct);
+        var result = await mediator.Send(new GetCustomerByIdQuery(id), ct);
         if (!result.TryGetResult(out var customer) || customer is null)
         {
             return result.Error.MapDomainError();
         }
 
         return TypedResults.Ok(customer);
+    }
+
+    private static async Task<IResult> RegisterPayment(
+        Guid id,
+        RegisterPaymentRequest request,
+        IMediator mediator,
+        CancellationToken ct)
+    {
+        var command = new RegisterAccountPaymentCommand(
+            id,
+            request.Amount,
+            request.PaymentMethodId,
+            request.Concept);
+
+        var result = await mediator.Send(command, ct);
+        if (!result.IsGood)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.NoContent();
     }
 }
