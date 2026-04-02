@@ -40,9 +40,6 @@ public class CustomerConfiguration : IEntityTypeConfiguration<Customer>
             b.Property(a => a.Reference).HasColumnName("Address_Reference").HasMaxLength(200);
         });
 
-        builder.HasOne(c => c.Account)
-            .WithOne()
-            .HasForeignKey<CustomerAccount>(a => a.CustomerId)
-            .OnDelete(DeleteBehavior.Cascade);
+
     }
 }

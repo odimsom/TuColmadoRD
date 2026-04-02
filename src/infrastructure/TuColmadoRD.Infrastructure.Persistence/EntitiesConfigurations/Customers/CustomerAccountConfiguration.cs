@@ -25,5 +25,13 @@ public class CustomerAccountConfiguration : IEntityTypeConfiguration<CustomerAcc
         {
             b.Property(m => m.Amount).HasColumnName("CreditLimit").HasColumnType("decimal(18,2)").IsRequired();
         });
+
+        builder.HasMany("_transactions")
+            .WithOne()
+            .HasForeignKey("CustomerAccountId")
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.Navigation("_transactions").UsePropertyAccessMode(PropertyAccessMode.Field);
+
     }
 }

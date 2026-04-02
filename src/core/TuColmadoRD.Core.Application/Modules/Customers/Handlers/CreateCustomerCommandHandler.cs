@@ -14,15 +14,18 @@ public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustome
 {
     private readonly ITenantProvider _tenantProvider;
     private readonly ICustomerRepository _customerRepository;
+    private readonly ICustomerAccountRepository _customerAccountRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateCustomerCommandHandler(
         ITenantProvider tenantProvider,
         ICustomerRepository customerRepository,
+        ICustomerAccountRepository customerAccountRepository,
         IUnitOfWork unitOfWork)
     {
         _tenantProvider = tenantProvider;
         _customerRepository = customerRepository;
+        _customerAccountRepository = customerAccountRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -76,29 +79,40 @@ public sealed class CreateCustomerCommandHandler : IRequestHandler<CreateCustome
         if (!createResult.TryGetResult(out var customer) || customer is null)
         {
             return OperationResult<CreateCustomerResult, DomainError>.Bad(
-                DomainError.Validation("customer.invalid", createResult.Error));
+                DomainError.Validation("customer.invalid", createResult.Error));        }
+
+        Money creditLimit = Money.Zero;
+        if (request.CreditLimit.HasValue)        {
+            var creditResult = Money.FromDecimal(request.CreditLimit.Value);    
+            if (!creditResult.TryGetResult(out creditLimit!) || creditLimit is null)
+            {
+                return OperationResult<CreateCustomerResult, DomainError>.Bad(  
+                    DomainError.Validation("customer.credit_invalid", creditResult.Error?.Message));
+            }
+        }
+        else
+        {
+            creditLimit = Money.FromDecimal(5000).Result!; // Default
         }
 
-        if (request.CreditLimit.HasValue)
+        var accountResult = CustomerAccount.Create(_tenantProvider.TenantId, customer.Id, creditLimit);
+        if (!accountResult.TryGetResult(out var account) || account is null)
         {
-            var creditResult = Money.FromDecimal(request.CreditLimit.Value);
-            if (!creditResult.TryGetResult(out var creditLimit) || creditLimit is null)
-            {
-                return OperationResult<CreateCustomerResult, DomainError>.Bad(creditResult.Error);
-            }
-
-            customer.Account.UpdateCreditLimit(creditLimit);
+            return OperationResult<CreateCustomerResult, DomainError>.Bad(
+                DomainError.Validation("customer_account.invalid", "Limíte de crédito inválido"));
         }
 
         await _customerRepository.AddAsync(customer, cancellationToken);
+        await _customerAccountRepository.AddAsync(account, cancellationToken);
+        
         await _unitOfWork.CommitAsync(cancellationToken);
 
         return OperationResult<CreateCustomerResult, DomainError>.Good(
             new CreateCustomerResult(
                 customer.Id,
-                customer.Account.Id,
-                customer.Account.Balance.Amount,
-                customer.Account.CreditLimit.Amount,
+                account.Id,
+                account.Balance.Amount,
+                account.CreditLimit.Amount,
                 customer.IsActive,
                 customer.CreatedAt));
     }
