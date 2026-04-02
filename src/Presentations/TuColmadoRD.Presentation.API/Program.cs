@@ -18,6 +18,7 @@ builder.Services.AddAuthorization();
 
 // Services registrations
 builder.Services.AddGlobalServices(builder.Configuration);
+builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
 var app = builder.Build();
 

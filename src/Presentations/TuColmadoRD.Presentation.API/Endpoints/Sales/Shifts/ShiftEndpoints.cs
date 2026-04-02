@@ -32,7 +32,9 @@ public static class ShiftEndpoints
         group.MapGet("", GetShiftsPaged)
             .WithName("GetShiftsPaged")
             .WithOpenApi();
-
+        group.MapGet("/current/summary", GetCurrentShiftSummary)
+            .WithName("GetCurrentShiftSummary")
+            .WithOpenApi();
         return app;
     }
 
@@ -138,5 +140,23 @@ public static class ShiftEndpoints
             paged.PageSize,
             paged.TotalCount,
             paged.TotalPages));
+    }
+
+    private static async Task<IResult> GetCurrentShiftSummary(
+        IMediator mediator,
+        TuColmadoRD.Core.Application.Interfaces.Tenancy.ITenantProvider tenantProvider,
+        CancellationToken ct)
+    {
+        // Obtain actual terminal Id from the context or provider if available
+        var terminalId = Guid.Empty; // using an empty or default depending on system implementation
+        var query = new TuColmadoRD.Core.Application.Sales.Queries.GetCurrentShiftSummaryQuery(terminalId);
+        
+        var result = await mediator.Send(query, ct);
+        if (!result.IsGood || !result.TryGetResult(out var summary))
+        {
+            return result.Error.MapDomainError();
+        }
+
+        return TypedResults.Ok(summary);
     }
 }

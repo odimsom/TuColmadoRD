@@ -22,6 +22,12 @@ public static class CustomerEndpoints
         group.MapPost("/{id:guid}/payments", RegisterPayment)
             .WithName("RegisterPayment");
 
+        group.MapGet(string.Empty, GetCustomers)
+            .WithName("GetCustomers");
+
+        group.MapGet("/{id:guid}/statement", GetCustomerStatement)
+            .WithName("GetCustomerStatement");
+
         return app;
     }
 
@@ -94,5 +100,29 @@ public static class CustomerEndpoints
         }
 
         return TypedResults.NoContent();
+    }
+
+    private static async Task<IResult> GetCustomers(IMediator mediator, CancellationToken ct)
+    {
+        var result = await mediator.Send(new TuColmadoRD.Core.Application.Customers.Queries.GetCustomersWithBalanceQuery(), ct);
+        if (!result.IsGood)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        if (!result.TryGetResult(out var dtos)) return TypedResults.Ok();
+        return TypedResults.Ok(dtos);
+    }
+
+    private static async Task<IResult> GetCustomerStatement(Guid id, IMediator mediator, CancellationToken ct)
+    {
+        var result = await mediator.Send(new TuColmadoRD.Core.Application.Customers.Queries.GetCustomerStatementQuery(id), ct);
+        if (!result.IsGood)
+        {
+            return result.Error.MapDomainError();
+        }
+
+        if (!result.TryGetResult(out var dtos)) return TypedResults.Ok();
+        return TypedResults.Ok(dtos);
     }
 }
