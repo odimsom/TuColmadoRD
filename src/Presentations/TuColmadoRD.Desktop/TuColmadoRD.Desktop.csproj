@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
     <ProjectReference Include="..\TuColmadoRD.ApiGateway\TuColmadoRD.ApiGateway.csproj" />
     <ProjectReference Include="..\TuColmadoRD.Presentation.API\TuColmadoRD.Presentation.API.csproj" />
     <ProjectReference Include="..\..\infrastructure\TuColmadoRD.Infrastructure.IOC\TuColmadoRD.Infrastructure.IOC.csproj" />

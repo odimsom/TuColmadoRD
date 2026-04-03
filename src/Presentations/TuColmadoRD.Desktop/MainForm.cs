@@ -1,10 +1,13 @@
+using System;
+using System.Drawing;
+using System.Windows.Forms;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace TuColmadoRD.Desktop;
 
 public partial class MainForm : Form
 {
-    private WebView2 _webView;
+    private Microsoft.Web.WebView2.WinForms.WebView2 _webView;
     private Panel _splashPanel;
     private readonly string _startUrl;
 
@@ -27,8 +30,7 @@ public partial class MainForm : Form
         _splashPanel = new Panel
         {
             Dock = DockStyle.Fill,
-            BackColor = Color.FromArgb(15, 23, 42), // slate-900
-            ZOrder = 1
+            BackColor = Color.FromArgb(15, 23, 42) // slate-900
         };
 
         var lblTitle = new Label
@@ -72,7 +74,7 @@ public partial class MainForm : Form
         };
 
         // WebView2
-        _webView = new WebView2
+        _webView = new Microsoft.Web.WebView2.WinForms.WebView2
         {
             Dock = DockStyle.Fill,
             Visible = false
