@@ -10,6 +10,7 @@ namespace TuColmadoRD.Desktop;
 
 public partial class MainForm : Form
 {
+    private const bool IsTestMode = true;
     private Microsoft.Web.WebView2.WinForms.WebView2 _webView = null!;
     private Panel _splashPanel = null!;
     private Panel _quickActionsBar = null!;
@@ -220,42 +221,32 @@ public partial class MainForm : Form
     {
         var panel = new Panel
         {
-            Size = new Size(560, 84),
+            Size = new Size(620, 96),
             BackColor = Color.FromArgb(20, 30, 52)
         };
 
-        var openPortalButton = new Button
+        var hintLabel = new Label
         {
-            Text = "Abrir Portal Local",
-            Width = 170,
-            Height = 34,
+            Text = "Si la vista local tarda en cargar, usa una opcion para continuar.",
+            ForeColor = Color.FromArgb(148, 163, 184),
+            Font = new Font("Segoe UI", 9),
+            AutoSize = true,
             Left = 14,
-            Top = 24
+            Top = 8
         };
+
+        var openPortalButton = CreateActionButton("Abrir Portal Local", 14, 34, 180, 36);
         openPortalButton.Click += (_, _) => OpenExternalUrl("http://localhost:5100/");
 
-        var openApiButton = new Button
-        {
-            Text = "Abrir API Local",
-            Width = 170,
-            Height = 34,
-            Left = 195,
-            Top = 24
-        };
-        openApiButton.Click += (_, _) => OpenExternalUrl("http://localhost:5200/swagger");
+        var apiBlockedButton = CreateActionButton("API bloqueada (TEST)", 204, 34, 180, 36);
+        apiBlockedButton.Enabled = false;
 
-        var retryButton = new Button
-        {
-            Text = "Reintentar",
-            Width = 170,
-            Height = 34,
-            Left = 376,
-            Top = 24
-        };
+        var retryButton = CreateActionButton("Reintentar", 394, 34, 180, 36);
         retryButton.Click += async (_, _) => await ConfigureWebViewAsync();
 
+        panel.Controls.Add(hintLabel);
         panel.Controls.Add(openPortalButton);
-        panel.Controls.Add(openApiButton);
+        panel.Controls.Add(apiBlockedButton);
         panel.Controls.Add(retryButton);
         return panel;
     }
@@ -265,38 +256,27 @@ public partial class MainForm : Form
         var panel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 42,
+            Height = 48,
             BackColor = Color.FromArgb(20, 30, 52)
         };
 
-        var openPortalButton = new Button
+        var title = new Label
         {
-            Text = "Portal Local",
-            Width = 120,
-            Height = 28,
-            Left = 10,
-            Top = 7
+            Text = "MODO TEST",
+            ForeColor = Color.FromArgb(148, 163, 184),
+            Font = new Font("Segoe UI", 8, FontStyle.Bold),
+            AutoSize = true,
+            Left = 14,
+            Top = 16
         };
+
+        var openPortalButton = CreateActionButton("Portal Local", 110, 10, 132, 28);
         openPortalButton.Click += (_, _) => OpenExternalUrl("http://localhost:5100/");
 
-        var openApiButton = new Button
-        {
-            Text = "API Local",
-            Width = 120,
-            Height = 28,
-            Left = 140,
-            Top = 7
-        };
-        openApiButton.Click += (_, _) => OpenExternalUrl("http://localhost:5200/swagger");
+        var apiBlockedButton = CreateActionButton("API bloqueada", 250, 10, 132, 28);
+        apiBlockedButton.Enabled = false;
 
-        var reloadButton = new Button
-        {
-            Text = "Recargar",
-            Width = 120,
-            Height = 28,
-            Left = 270,
-            Top = 7
-        };
+        var reloadButton = CreateActionButton("Recargar", 390, 10, 132, 28);
         reloadButton.Click += (_, _) =>
         {
             if (_webView.CoreWebView2 != null)
@@ -308,10 +288,44 @@ public partial class MainForm : Form
             _ = ConfigureWebViewAsync();
         };
 
+        panel.Controls.Add(title);
         panel.Controls.Add(openPortalButton);
-        panel.Controls.Add(openApiButton);
+        panel.Controls.Add(apiBlockedButton);
         panel.Controls.Add(reloadButton);
         return panel;
+    }
+
+    private Button CreateActionButton(string text, int left, int top, int width, int height)
+    {
+        var button = new Button
+        {
+            Text = text,
+            Width = width,
+            Height = height,
+            Left = left,
+            Top = top,
+            FlatStyle = FlatStyle.Flat,
+            BackColor = Color.FromArgb(30, 41, 59),
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 9, FontStyle.Bold),
+            Cursor = Cursors.Hand,
+            UseVisualStyleBackColor = false
+        };
+
+        button.FlatAppearance.BorderColor = Color.FromArgb(96, 165, 250);
+        button.FlatAppearance.BorderSize = 1;
+        button.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
+        button.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
+
+        if (IsTestMode && text.Contains("API", StringComparison.OrdinalIgnoreCase))
+        {
+            button.BackColor = Color.FromArgb(51, 65, 85);
+            button.FlatAppearance.BorderColor = Color.FromArgb(71, 85, 105);
+            button.ForeColor = Color.FromArgb(148, 163, 184);
+            button.Cursor = Cursors.No;
+        }
+
+        return button;
     }
 
     private static void OpenExternalUrl(string url)
