@@ -48,8 +48,6 @@ public partial class MainForm : Form
         _startUrl = startUrl;
         _openWebViewOnStart = openWebViewOnStart;
         _isTestBuild = ReadIsTestBuild();
-        this.Opacity = 0;
-        this.ShowInTaskbar = false;
 
         InitializeComponent();
 
@@ -70,8 +68,6 @@ public partial class MainForm : Form
                 AppLogger.Error("Launcher initialization failed", ex);
                 ShowLauncher();
             }
-            this.Opacity = 1;
-            this.ShowInTaskbar = true;
             Ready?.Invoke(this, EventArgs.Empty);
         };
 
@@ -87,6 +83,8 @@ public partial class MainForm : Form
         this.MinimumSize = new Size(800, 520);
         this.StartPosition = FormStartPosition.CenterScreen;
         this.Text = "TuColmadoRD - Punto de Venta";
+        this.Opacity = 1;
+        this.ShowInTaskbar = true;
 
         this.Icon = BrandAssets.CreateLogoIcon(32);
 
