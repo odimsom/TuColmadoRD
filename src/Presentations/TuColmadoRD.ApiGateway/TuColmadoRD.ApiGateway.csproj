@@ -7,8 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'DesktopPublish'">
-    <ExcludeAppSettingsFromPublish>true</ExcludeAppSettingsFromPublish>
+  <PropertyGroup>
+    <ExcludeAppSettingsFromPublish Condition="'$(ExcludeAppSettingsFromPublish)' == '' and '$(Configuration)' == 'DesktopPublish'">true</ExcludeAppSettingsFromPublish>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(ExcludeAppSettingsFromPublish)' == 'true'">
