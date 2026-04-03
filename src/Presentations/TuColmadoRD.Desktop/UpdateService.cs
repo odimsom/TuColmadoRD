@@ -15,9 +15,9 @@ internal static class UpdateService
         var localResolved = await TryResolveLatestInstallerFromLocalApiAsync();
         if (localResolved != null)
         {
-            var current = GetCurrentVersion();
+            var currentInstalledVersion = GetCurrentVersion();
             var isTestTag = localResolved.Tag.Contains("-test", StringComparison.OrdinalIgnoreCase);
-            var hasNewerVersion = localResolved.Version > current;
+            var hasNewerVersion = localResolved.Version > currentInstalledVersion;
 
             if (isTestTag || hasNewerVersion)
             {
