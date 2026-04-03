@@ -62,8 +62,8 @@ internal static class UpdateService
 
         var latestTag = latest.Release.TagName ?? string.Empty;
         var isTestRelease = latestTag.Contains("-test", StringComparison.OrdinalIgnoreCase);
-        var current = GetCurrentVersion();
-        if (!isTestRelease && latest.Version! <= current)
+        var currentVersion = GetCurrentVersion();
+        if (!isTestRelease && latest.Version! <= currentVersion)
         {
             return UpdateCheckResult.NoUpdate;
         }
