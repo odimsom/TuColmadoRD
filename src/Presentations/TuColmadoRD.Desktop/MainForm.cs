@@ -8,7 +8,6 @@ using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using FontAwesome.Sharp;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -52,12 +51,20 @@ public partial class MainForm : Form
 
         this.Shown += async (_, _) =>
         {
-            await ConfigureWebViewAsync();
-            await RefreshLauncherAsync();
-
-            if (_openWebViewOnStart)
+            try
             {
-                ShowWebView();
+                await ConfigureWebViewAsync();
+                await RefreshLauncherAsync();
+
+                if (_openWebViewOnStart)
+                {
+                    ShowWebView();
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Error("Launcher initialization failed", ex);
+                ShowLauncher();
             }
         };
 
@@ -74,11 +81,7 @@ public partial class MainForm : Form
         this.StartPosition = FormStartPosition.CenterScreen;
         this.Text = "TuColmadoRD - Punto de Venta";
 
-        var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
-        if (File.Exists(iconPath))
-        {
-            this.Icon = new System.Drawing.Icon(iconPath);
-        }
+        this.Icon = BrandAssets.CreateLogoIcon(32);
 
         _launcherPanel = new Panel
         {
@@ -290,10 +293,10 @@ public partial class MainForm : Form
         actions.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
         actions.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
 
-        actions.Controls.Add(BuildActionCard("Abrir punto de venta", "Cobrar, fiados y turno", Color.FromArgb(37, 99, 235), "http://localhost:5100/pos", true, IconChar.CashRegister), 0, 0);
-        actions.Controls.Add(BuildActionCard("Ver reportes", "Ventas, turnos, cuadre", Color.FromArgb(74, 222, 128), "http://localhost:5100/portal/reports", false, IconChar.ChartLine), 1, 0);
-        actions.Controls.Add(BuildActionCard("Inventario", "Productos y stock", Color.FromArgb(239, 159, 39), "http://localhost:5100/portal/inventory", false, IconChar.BoxesStacked), 0, 1);
-        actions.Controls.Add(BuildActionCard("Fiados", "Clientes y cuentas", Color.FromArgb(167, 139, 250), "http://localhost:5100/portal/customers", false, IconChar.Users), 1, 1);
+        actions.Controls.Add(BuildActionCard("Abrir punto de venta", "Cobrar, fiados y turno", Color.FromArgb(37, 99, 235), "http://localhost:5100/pos", true), 0, 0);
+        actions.Controls.Add(BuildActionCard("Ver reportes", "Ventas, turnos, cuadre", Color.FromArgb(74, 222, 128), "http://localhost:5100/portal/reports", false), 1, 0);
+        actions.Controls.Add(BuildActionCard("Inventario", "Productos y stock", Color.FromArgb(239, 159, 39), "http://localhost:5100/portal/inventory", false), 0, 1);
+        actions.Controls.Add(BuildActionCard("Fiados", "Clientes y cuentas", Color.FromArgb(167, 139, 250), "http://localhost:5100/portal/customers", false), 1, 1);
 
         body.Controls.Add(actions);
         body.Controls.Add(stats);
@@ -349,6 +352,7 @@ public partial class MainForm : Form
         var userDataFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TuColmadoRD", "WebView2");
         Directory.CreateDirectory(userDataFolder);
 
+        AppLogger.Info($"Creating WebView2 environment at {userDataFolder}");
         var env = await CoreWebView2Environment.CreateAsync(null, userDataFolder);
         await _webView.EnsureCoreWebView2Async(env);
 
@@ -364,6 +368,7 @@ public partial class MainForm : Form
 
         _webViewInitialized = true;
         _webView.Source = new Uri(_startUrl);
+        AppLogger.Info($"WebView2 ready, navigating to {_startUrl}");
     }
 
     public void ShowWebView()
@@ -548,7 +553,7 @@ public partial class MainForm : Form
         return card;
     }
 
-    private Panel BuildActionCard(string title, string subtitle, Color accent, string targetUrl, bool primary, IconChar icon)
+    private Panel BuildActionCard(string title, string subtitle, Color accent, string targetUrl, bool primary)
     {
         var card = CreateCard(primary ? Color.FromArgb(85, 37, 99, 235) : Color.FromArgb(51, 30, 58, 138));
         card.Height = 96;
@@ -569,11 +574,10 @@ public partial class MainForm : Form
             e.Graphics.FillEllipse(brush, 0, 0, iconCircle.Width - 1, iconCircle.Height - 1);
         };
 
-        var iconImage = new IconPictureBox
+        var iconImage = new PictureBox
         {
-            IconChar = icon,
-            IconColor = accent,
-            IconSize = 16,
+            Image = BrandAssets.CreateLogoBitmap(18),
+            SizeMode = PictureBoxSizeMode.Zoom,
             BackColor = Color.Transparent,
             Size = new Size(18, 18),
             Left = 11,
