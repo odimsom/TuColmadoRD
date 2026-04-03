@@ -1,9 +1,13 @@
-#define AppVersion GetEnv("AppVersion")
+#ifndef AppVersion
+  #define AppVersion GetEnv("APP_VERSION")
+#endif
 #if AppVersion == ""
   #define AppVersion "0.1.0-test"
 #endif
 
-#define AppVersionNumeric GetEnv("AppVersionNumeric")
+#ifndef AppVersionNumeric
+  #define AppVersionNumeric GetEnv("APP_VERSION_NUMERIC")
+#endif
 #if AppVersionNumeric == ""
   #define AppVersionNumeric "0.1.0.0"
 #endif
@@ -60,8 +64,8 @@ WizardSmallImageFile={#WizardSmallImagePath}
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Crear icono en el escritorio"; GroupDescription: "Accesos directos:"; Flags: checkedonce
-Name: "startupicon"; Description: "Iniciar TuColmadoRD con Windows"; GroupDescription: "Inicio automatico:"; Flags: unchecked
+Name: "desktopicon"; Description: "Crear icono en el escritorio"; Flags: checkedonce
+Name: "startupicon"; Description: "Iniciar TuColmadoRD con Windows"; Flags: unchecked
 Name: "launchapp"; Description: "Abrir TuColmadoRD al finalizar la instalacion"; Flags: checkedonce
 
 [Files]
