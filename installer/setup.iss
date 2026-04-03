@@ -9,6 +9,7 @@
 #define SetupIconPath AddBackslash(SourcePath) + AssetsDir + "\\setup.ico"
 
 [Setup]
+AppId={{E8A6E2E4-3C2A-49D2-BB48-7A02489A4472}
 AppName=TuColmadoRD
 AppVersion={#AppVersion}
 AppPublisher=Synset Solutions
@@ -47,7 +48,7 @@ Name: "desktopicon"; Description: "Crear ícono en el escritorio"; Flags: checke
 Name: "startupicon"; Description: "Iniciar TuColmadoRD con Windows"; Flags: unchecked
 
 [Files]
-Source: "../publish/desktop/TuColmadoRD.Desktop.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "../publish/desktop/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; Pre-instalar WebView2 si es necesario (el setup.exe debería estar en assets/)
 ; Source: "../assets/MicrosoftEdgeWebview2Setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
