@@ -52,12 +52,15 @@ public static class CoreApiHostBuilder
         var app = builder.Build();
 
         app.UseSwagger();
-        if (app.Environment.IsDevelopment())
+        if (isLocal || app.Environment.IsDevelopment())
         {
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
+        if (!isLocal)
+        {
+            app.UseHttpsRedirection();
+        }
         app.UseMiddleware<SubscriptionGuardMiddleware>();
 
         app.MapInventoryEndpoints();
