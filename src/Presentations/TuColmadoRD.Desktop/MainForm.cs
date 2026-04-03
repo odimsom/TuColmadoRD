@@ -10,10 +10,18 @@ namespace TuColmadoRD.Desktop;
 
 public partial class MainForm : Form
 {
-    private const bool IsTestMode = true;
+    private static readonly bool IsProductionMode =
+        string.Equals(Environment.GetEnvironmentVariable("RELEASE_TYPE"), "production", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(Environment.GetEnvironmentVariable("APP_ENV"), "production", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT"), "Production", StringComparison.OrdinalIgnoreCase);
+
+    private static bool ShowApiActions => !IsProductionMode;
+
     private Microsoft.Web.WebView2.WinForms.WebView2 _webView = null!;
     private Panel _splashPanel = null!;
     private Panel _quickActionsBar = null!;
+    private Panel _headerPanel = null!;
     private Label _statusLabel = null!;
     private Panel _actionPanel = null!;
     private readonly string _startUrl;
@@ -69,7 +77,7 @@ public partial class MainForm : Form
 
         var logoBox = new PictureBox
         {
-            Size = new Size(120, 120),
+            Size = new Size(132, 132),
             SizeMode = PictureBoxSizeMode.Zoom,
             Image = this.Icon?.ToBitmap(),
             BackColor = Color.Transparent
@@ -79,10 +87,21 @@ public partial class MainForm : Form
         {
             Text = "TuColmadoRD",
             ForeColor = Color.White,
-            Font = new Font("Segoe UI", 24, FontStyle.Bold),
+            Font = new Font("Segoe UI", 28, FontStyle.Bold),
             AutoSize = true,
             TextAlign = ContentAlignment.MiddleCenter
         };
+
+        var lblSubtitle = new Label
+        {
+            Text = "Punto de venta, portal local y control operativo en una sola pantalla.",
+            ForeColor = Color.FromArgb(191, 219, 254),
+            Font = new Font("Segoe UI", 11),
+            AutoSize = true,
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+
+        var summaryCard = BuildSummaryCard();
         
         _statusLabel = new Label
         {
@@ -106,6 +125,8 @@ public partial class MainForm : Form
 
         _splashPanel.Controls.Add(logoBox);
         _splashPanel.Controls.Add(lblTitle);
+        _splashPanel.Controls.Add(lblSubtitle);
+        _splashPanel.Controls.Add(summaryCard);
         _splashPanel.Controls.Add(_statusLabel);
         _splashPanel.Controls.Add(progressBar);
         _splashPanel.Controls.Add(_actionPanel);
@@ -115,10 +136,12 @@ public partial class MainForm : Form
         // Center splash controls
         this.Load += (s, e) =>
         {
-            logoBox.Location = new Point((this.ClientSize.Width - logoBox.Width) / 2, (this.ClientSize.Height - logoBox.Height) / 2 - 130);
-            lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, logoBox.Bottom + 12);
-            _statusLabel.Location = new Point((this.ClientSize.Width - _statusLabel.Width) / 2, lblTitle.Bottom + 10);
-            progressBar.Location = new Point((this.ClientSize.Width - progressBar.Width) / 2, _statusLabel.Bottom + 30);
+            logoBox.Location = new Point((this.ClientSize.Width - logoBox.Width) / 2, 92);
+            lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, logoBox.Bottom + 10);
+            lblSubtitle.Location = new Point((this.ClientSize.Width - lblSubtitle.Width) / 2, lblTitle.Bottom + 10);
+            summaryCard.Location = new Point((this.ClientSize.Width - summaryCard.Width) / 2, lblSubtitle.Bottom + 26);
+            _statusLabel.Location = new Point((this.ClientSize.Width - _statusLabel.Width) / 2, summaryCard.Bottom + 16);
+            progressBar.Location = new Point((this.ClientSize.Width - progressBar.Width) / 2, _statusLabel.Bottom + 24);
             _actionPanel.Location = new Point((this.ClientSize.Width - _actionPanel.Width) / 2, progressBar.Bottom + 24);
         };
 
@@ -129,8 +152,10 @@ public partial class MainForm : Form
             Visible = false
         };
 
+        _headerPanel = BuildHeaderPanel();
         _quickActionsBar = BuildQuickActionsBar();
         this.Controls.Add(_webView);
+        this.Controls.Add(_headerPanel);
         this.Controls.Add(_quickActionsBar);
 
         this.KeyDown += (s, e) =>
@@ -210,6 +235,7 @@ public partial class MainForm : Form
             _navigationCompletedSuccessfully = true;
             _splashPanel.Visible = false;
             _webView.Visible = true;
+            _headerPanel.Visible = true;
             return;
         }
 
@@ -221,7 +247,7 @@ public partial class MainForm : Form
     {
         var panel = new Panel
         {
-            Size = new Size(620, 96),
+            Size = new Size(760, 104),
             BackColor = Color.FromArgb(20, 30, 52)
         };
 
@@ -235,18 +261,21 @@ public partial class MainForm : Form
             Top = 8
         };
 
-        var openPortalButton = CreateActionButton("Abrir Portal Local", 14, 34, 180, 36);
+        var openPortalButton = CreateActionButton("Abrir Portal Local", 14, 38, 210, 36);
         openPortalButton.Click += (_, _) => OpenExternalUrl("http://localhost:5100/");
 
-        var apiBlockedButton = CreateActionButton("API bloqueada (TEST)", 204, 34, 180, 36);
-        apiBlockedButton.Enabled = false;
+        if (ShowApiActions)
+        {
+            var openApiButton = CreateActionButton("Abrir API Local", 234, 38, 210, 36);
+            openApiButton.Click += (_, _) => OpenExternalUrl("http://localhost:5200/swagger");
+            panel.Controls.Add(openApiButton);
+        }
 
-        var retryButton = CreateActionButton("Reintentar", 394, 34, 180, 36);
+        var retryButton = CreateActionButton("Reintentar", 454, 38, 140, 36);
         retryButton.Click += async (_, _) => await ConfigureWebViewAsync();
 
         panel.Controls.Add(hintLabel);
         panel.Controls.Add(openPortalButton);
-        panel.Controls.Add(apiBlockedButton);
         panel.Controls.Add(retryButton);
         return panel;
     }
@@ -256,27 +285,31 @@ public partial class MainForm : Form
         var panel = new Panel
         {
             Dock = DockStyle.Top,
-            Height = 48,
+            Height = 46,
             BackColor = Color.FromArgb(20, 30, 52)
         };
 
         var title = new Label
         {
-            Text = "MODO TEST",
+            Text = IsProductionMode ? "MODO PRODUCCION" : "MODO TEST",
             ForeColor = Color.FromArgb(148, 163, 184),
             Font = new Font("Segoe UI", 8, FontStyle.Bold),
             AutoSize = true,
             Left = 14,
-            Top = 16
+            Top = 14
         };
 
-        var openPortalButton = CreateActionButton("Portal Local", 110, 10, 132, 28);
+        var openPortalButton = CreateActionButton("Portal Local", 110, 9, 132, 28);
         openPortalButton.Click += (_, _) => OpenExternalUrl("http://localhost:5100/");
 
-        var apiBlockedButton = CreateActionButton("API bloqueada", 250, 10, 132, 28);
-        apiBlockedButton.Enabled = false;
+        if (ShowApiActions)
+        {
+            var openApiButton = CreateActionButton("API Local", 250, 9, 132, 28);
+            openApiButton.Click += (_, _) => OpenExternalUrl("http://localhost:5200/swagger");
+            panel.Controls.Add(openApiButton);
+        }
 
-        var reloadButton = CreateActionButton("Recargar", 390, 10, 132, 28);
+        var reloadButton = CreateActionButton("Recargar", ShowApiActions ? 390 : 250, 9, 132, 28);
         reloadButton.Click += (_, _) =>
         {
             if (_webView.CoreWebView2 != null)
@@ -290,9 +323,127 @@ public partial class MainForm : Form
 
         panel.Controls.Add(title);
         panel.Controls.Add(openPortalButton);
-        panel.Controls.Add(apiBlockedButton);
         panel.Controls.Add(reloadButton);
         return panel;
+    }
+
+    private Panel BuildHeaderPanel()
+    {
+        var panel = new Panel
+        {
+            Dock = DockStyle.Top,
+            Height = 88,
+            BackColor = Color.FromArgb(17, 24, 39),
+            Visible = false
+        };
+
+        var logo = new PictureBox
+        {
+            Size = new Size(56, 56),
+            Left = 18,
+            Top = 16,
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Image = this.Icon?.ToBitmap(),
+            BackColor = Color.Transparent
+        };
+
+        var title = new Label
+        {
+            Text = "TuColmadoRD",
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 20, FontStyle.Bold),
+            AutoSize = true,
+            Left = 88,
+            Top = 14
+        };
+
+        var subtitle = new Label
+        {
+            Text = "Operacion local con portal, ventas e inventario listos para el cliente.",
+            ForeColor = Color.FromArgb(148, 163, 184),
+            Font = new Font("Segoe UI", 9),
+            AutoSize = true,
+            Left = 90,
+            Top = 48
+        };
+
+        var modeBadge = CreateBadge(IsProductionMode ? "PRODUCCION" : "TEST", 430, Color.FromArgb(127, 29, 29));
+        var portalBadge = CreateBadge("Portal 5100", 555, Color.FromArgb(30, 41, 59));
+        var apiBadge = CreateBadge(ShowApiActions ? "API 5200" : "API oculta", 670, ShowApiActions ? Color.FromArgb(30, 41, 59) : Color.FromArgb(51, 65, 85));
+
+        panel.Controls.Add(logo);
+        panel.Controls.Add(title);
+        panel.Controls.Add(subtitle);
+        panel.Controls.Add(modeBadge);
+        panel.Controls.Add(portalBadge);
+        panel.Controls.Add(apiBadge);
+        return panel;
+    }
+
+    private Panel BuildSummaryCard()
+    {
+        var panel = new Panel
+        {
+            Size = new Size(760, 112),
+            BackColor = Color.FromArgb(17, 24, 39),
+            BorderStyle = BorderStyle.FixedSingle
+        };
+
+        panel.Controls.Add(CreateMetric("Portal Local", "http://localhost:5100", 26, 18));
+        panel.Controls.Add(CreateMetric("API Local", ShowApiActions ? "Disponible en test" : "Oculta en produccion", 280, 18));
+        panel.Controls.Add(CreateMetric("Estado", "Servicios iniciando", 534, 18));
+        panel.Controls.Add(CreateMetric("Atajos", "Portal, recargar y soporte local", 26, 60));
+
+        return panel;
+    }
+
+    private Control CreateMetric(string label, string value, int left, int top)
+    {
+        var container = new Panel
+        {
+            Size = new Size(210, 36),
+            Left = left,
+            Top = top,
+            BackColor = Color.Transparent
+        };
+
+        container.Controls.Add(new Label
+        {
+            Text = label,
+            ForeColor = Color.FromArgb(148, 163, 184),
+            Font = new Font("Segoe UI", 8),
+            AutoSize = true,
+            Left = 0,
+            Top = 0
+        });
+
+        container.Controls.Add(new Label
+        {
+            Text = value,
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 10, FontStyle.Bold),
+            AutoSize = true,
+            Left = 0,
+            Top = 15
+        });
+
+        return container;
+    }
+
+    private Label CreateBadge(string text, int left, Color backColor)
+    {
+        return new Label
+        {
+            Text = text,
+            AutoSize = true,
+            Left = left,
+            Top = 28,
+            Padding = new Padding(12, 6, 12, 6),
+            BackColor = backColor,
+            ForeColor = Color.White,
+            Font = new Font("Segoe UI", 8, FontStyle.Bold),
+            BorderStyle = BorderStyle.FixedSingle
+        };
     }
 
     private Button CreateActionButton(string text, int left, int top, int width, int height)
@@ -317,7 +468,7 @@ public partial class MainForm : Form
         button.FlatAppearance.MouseOverBackColor = Color.FromArgb(37, 99, 235);
         button.FlatAppearance.MouseDownBackColor = Color.FromArgb(29, 78, 216);
 
-        if (IsTestMode && text.Contains("API", StringComparison.OrdinalIgnoreCase))
+        if (!ShowApiActions && text.Contains("API", StringComparison.OrdinalIgnoreCase))
         {
             button.BackColor = Color.FromArgb(51, 65, 85);
             button.FlatAppearance.BorderColor = Color.FromArgb(71, 85, 105);
@@ -346,6 +497,7 @@ public partial class MainForm : Form
         }
         _splashPanel.Visible = false;
         _webView.Visible = true;
+        _headerPanel.Visible = true;
     }
 
     private async Task CheckForUpdatesAsync()
