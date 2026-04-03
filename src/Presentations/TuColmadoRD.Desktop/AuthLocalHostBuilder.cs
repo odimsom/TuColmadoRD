@@ -16,6 +16,10 @@ public static class AuthLocalHostBuilder
     public static WebApplication BuildAuthLocal(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
+
+        builder.Configuration["Persistence:EnableInMemoryFallback"] = "true";
+        builder.Configuration["BackgroundWorkers:Enabled"] = "false";
+        builder.Configuration["AuthApi:BaseUrl"] = "http://localhost:5300";
         
         // Add services needed by Auth logic (MediatR, Persistence, etc)
         // These are usually registered in GlobalServices

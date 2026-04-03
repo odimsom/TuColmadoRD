@@ -3,11 +3,19 @@
   #define AppVersion "0.1.0-test"
 #endif
 
+#define AssetsDir "assets"
+#define WizardImagePath AddBackslash(SourcePath) + AssetsDir + "\\wizard.bmp"
+#define WizardSmallImagePath AddBackslash(SourcePath) + AssetsDir + "\\wizard-small.bmp"
+#define SetupIconPath AddBackslash(SourcePath) + AssetsDir + "\\setup.ico"
+
 [Setup]
 AppName=TuColmadoRD
 AppVersion={#AppVersion}
 AppPublisher=Synset Solutions
 AppPublisherURL=https://tucolmadord.com
+AppSupportURL=https://wa.me/18296932458
+AppUpdatesURL=https://tucolmadord.com
+AppCopyright=Copyright (c) 2026 Synset Solutions
 DefaultDirName={autopf}\TuColmadoRD
 DefaultGroupName=TuColmadoRD
 OutputDir=../publish/installer
@@ -17,6 +25,19 @@ SolidCompression=yes
 PrivilegesRequired=admin
 WizardStyle=modern
 MinVersion=10.0
+LicenseFile=terms-and-conditions.txt
+
+#ifexist "{#SetupIconPath}"
+SetupIconFile={#SetupIconPath}
+#endif
+
+#ifexist "{#WizardImagePath}"
+WizardImageFile={#WizardImagePath}
+#endif
+
+#ifexist "{#WizardSmallImagePath}"
+WizardSmallImageFile={#WizardSmallImagePath}
+#endif
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
