@@ -12,6 +12,7 @@ public partial class MainForm : Form
 {
     private Microsoft.Web.WebView2.WinForms.WebView2 _webView = null!;
     private Panel _splashPanel = null!;
+    private Panel _quickActionsBar = null!;
     private Label _statusLabel = null!;
     private Panel _actionPanel = null!;
     private readonly string _startUrl;
@@ -47,7 +48,16 @@ public partial class MainForm : Form
         this.Size = new Size(1280, 800);
         this.MinimumSize = new Size(1024, 600);
         this.StartPosition = FormStartPosition.CenterScreen;
-        this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+
+        var localIconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
+        if (File.Exists(localIconPath))
+        {
+            this.Icon = new Icon(localIconPath);
+        }
+        else
+        {
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
 
         // Splash Panel
         _splashPanel = new Panel
@@ -117,7 +127,10 @@ public partial class MainForm : Form
             Dock = DockStyle.Fill,
             Visible = false
         };
+
+        _quickActionsBar = BuildQuickActionsBar();
         this.Controls.Add(_webView);
+        this.Controls.Add(_quickActionsBar);
 
         this.KeyDown += (s, e) =>
         {
@@ -244,6 +257,60 @@ public partial class MainForm : Form
         panel.Controls.Add(openPortalButton);
         panel.Controls.Add(openApiButton);
         panel.Controls.Add(retryButton);
+        return panel;
+    }
+
+    private Panel BuildQuickActionsBar()
+    {
+        var panel = new Panel
+        {
+            Dock = DockStyle.Top,
+            Height = 42,
+            BackColor = Color.FromArgb(20, 30, 52)
+        };
+
+        var openPortalButton = new Button
+        {
+            Text = "Portal Local",
+            Width = 120,
+            Height = 28,
+            Left = 10,
+            Top = 7
+        };
+        openPortalButton.Click += (_, _) => OpenExternalUrl("http://localhost:5100/");
+
+        var openApiButton = new Button
+        {
+            Text = "API Local",
+            Width = 120,
+            Height = 28,
+            Left = 140,
+            Top = 7
+        };
+        openApiButton.Click += (_, _) => OpenExternalUrl("http://localhost:5200/swagger");
+
+        var reloadButton = new Button
+        {
+            Text = "Recargar",
+            Width = 120,
+            Height = 28,
+            Left = 270,
+            Top = 7
+        };
+        reloadButton.Click += (_, _) =>
+        {
+            if (_webView.CoreWebView2 != null)
+            {
+                _webView.CoreWebView2.Reload();
+                return;
+            }
+
+            _ = ConfigureWebViewAsync();
+        };
+
+        panel.Controls.Add(openPortalButton);
+        panel.Controls.Add(openApiButton);
+        panel.Controls.Add(reloadButton);
         return panel;
     }
 

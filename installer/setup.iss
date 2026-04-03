@@ -70,13 +70,14 @@ Name: "launchapp"; Description: "Abrir TuColmadoRD al finalizar la instalacion"
 
 [Files]
 Source: "../publish/desktop/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "assets/app.ico"; DestDir: "{app}"; Flags: ignoreversion
 ; Pre-instalar WebView2 si es necesario (el setup.exe debería estar en assets/)
 ; Source: "../assets/MicrosoftEdgeWebview2Setup.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall
 
 [Icons]
-Name: "{group}\TuColmadoRD"; Filename: "{app}\TuColmadoRD.Desktop.exe"; WorkingDir: "{app}"; Comment: "Sistema de gestion TuColmadoRD"
-Name: "{commondesktop}\TuColmadoRD"; Filename: "{app}\TuColmadoRD.Desktop.exe"; WorkingDir: "{app}"; Tasks: desktopicon
-Name: "{userstartup}\TuColmadoRD"; Filename: "{app}\TuColmadoRD.Desktop.exe"; WorkingDir: "{app}"; Tasks: startupicon
+Name: "{group}\TuColmadoRD"; Filename: "{app}\TuColmadoRD.Desktop.exe"; WorkingDir: "{app}"; IconFilename: "{app}\app.ico"; Comment: "Sistema de gestion TuColmadoRD"
+Name: "{commondesktop}\TuColmadoRD"; Filename: "{app}\TuColmadoRD.Desktop.exe"; WorkingDir: "{app}"; IconFilename: "{app}\app.ico"; Tasks: desktopicon
+Name: "{userstartup}\TuColmadoRD"; Filename: "{app}\TuColmadoRD.Desktop.exe"; WorkingDir: "{app}"; IconFilename: "{app}\app.ico"; Tasks: startupicon
 
 [Run]
 Filename: "{app}\TuColmadoRD.Desktop.exe"; Description: "Abrir TuColmadoRD"; Flags: nowait postinstall skipifsilent; Tasks: launchapp
