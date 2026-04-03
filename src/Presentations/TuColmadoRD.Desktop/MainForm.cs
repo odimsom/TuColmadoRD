@@ -8,6 +8,7 @@ using System.Net.NetworkInformation;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FontAwesome.Sharp;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
@@ -76,7 +77,7 @@ public partial class MainForm : Form
         var iconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
         if (File.Exists(iconPath))
         {
-            this.Icon = new Icon(iconPath);
+            this.Icon = new System.Drawing.Icon(iconPath);
         }
 
         _launcherPanel = new Panel
@@ -129,7 +130,7 @@ public partial class MainForm : Form
             Size = new Size(18, 18),
             Location = new Point(12, 10),
             SizeMode = PictureBoxSizeMode.Zoom,
-            Image = CreateBrandLogo(18),
+            Image = BrandAssets.CreateLogoBitmap(18),
             BackColor = Color.Transparent
         };
 
@@ -229,7 +230,7 @@ public partial class MainForm : Form
             Size = new Size(48, 48),
             Location = new Point(0, 8),
             SizeMode = PictureBoxSizeMode.Zoom,
-            Image = CreateBrandLogo(48)
+            Image = BrandAssets.CreateLogoBitmap(48)
         };
 
         var title = new Label
@@ -289,10 +290,10 @@ public partial class MainForm : Form
         actions.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
         actions.RowStyles.Add(new RowStyle(SizeType.Percent, 50f));
 
-        actions.Controls.Add(BuildActionCard("Abrir punto de venta", "Cobrar, fiados y turno", Color.FromArgb(37, 99, 235), "http://localhost:5100/pos", true), 0, 0);
-        actions.Controls.Add(BuildActionCard("Ver reportes", "Ventas, turnos, cuadre", Color.FromArgb(74, 222, 128), "http://localhost:5100/portal/reports", false), 1, 0);
-        actions.Controls.Add(BuildActionCard("Inventario", "Productos y stock", Color.FromArgb(239, 159, 39), "http://localhost:5100/portal/inventory", false), 0, 1);
-        actions.Controls.Add(BuildActionCard("Fiados", "Clientes y cuentas", Color.FromArgb(167, 139, 250), "http://localhost:5100/portal/customers", false), 1, 1);
+        actions.Controls.Add(BuildActionCard("Abrir punto de venta", "Cobrar, fiados y turno", Color.FromArgb(37, 99, 235), "http://localhost:5100/pos", true, IconChar.CashRegister), 0, 0);
+        actions.Controls.Add(BuildActionCard("Ver reportes", "Ventas, turnos, cuadre", Color.FromArgb(74, 222, 128), "http://localhost:5100/portal/reports", false, IconChar.ChartLine), 1, 0);
+        actions.Controls.Add(BuildActionCard("Inventario", "Productos y stock", Color.FromArgb(239, 159, 39), "http://localhost:5100/portal/inventory", false, IconChar.BoxesStacked), 0, 1);
+        actions.Controls.Add(BuildActionCard("Fiados", "Clientes y cuentas", Color.FromArgb(167, 139, 250), "http://localhost:5100/portal/customers", false, IconChar.Users), 1, 1);
 
         body.Controls.Add(actions);
         body.Controls.Add(stats);
@@ -547,7 +548,7 @@ public partial class MainForm : Form
         return card;
     }
 
-    private Panel BuildActionCard(string title, string subtitle, Color accent, string targetUrl, bool primary)
+    private Panel BuildActionCard(string title, string subtitle, Color accent, string targetUrl, bool primary, IconChar icon)
     {
         var card = CreateCard(primary ? Color.FromArgb(85, 37, 99, 235) : Color.FromArgb(51, 30, 58, 138));
         card.Height = 96;
@@ -568,20 +569,17 @@ public partial class MainForm : Form
             e.Graphics.FillEllipse(brush, 0, 0, iconCircle.Width - 1, iconCircle.Height - 1);
         };
 
-        var iconDot = new Panel
+        var iconImage = new IconPictureBox
         {
-            Size = new Size(12, 12),
-            Left = 14,
-            Top = 14,
-            BackColor = accent
+            IconChar = icon,
+            IconColor = accent,
+            IconSize = 16,
+            BackColor = Color.Transparent,
+            Size = new Size(18, 18),
+            Left = 11,
+            Top = 11
         };
-        iconDot.Paint += (_, e) =>
-        {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            using var brush = new SolidBrush(iconDot.BackColor);
-            e.Graphics.FillEllipse(brush, 0, 0, iconDot.Width - 1, iconDot.Height - 1);
-        };
-        iconCircle.Controls.Add(iconDot);
+        iconCircle.Controls.Add(iconImage);
 
         var titleLabel = new Label
         {
@@ -627,7 +625,7 @@ public partial class MainForm : Form
 
         void ClickAction(object? _, EventArgs __) => NavigateTo(targetUrl);
 
-        foreach (Control c in new Control[] { card, iconCircle, titleLabel, subtitleLabel, arrow })
+        foreach (Control c in new Control[] { card, iconCircle, iconImage, titleLabel, subtitleLabel, arrow })
         {
             c.MouseEnter += HoverOn;
             c.MouseLeave += HoverOff;
@@ -700,25 +698,6 @@ public partial class MainForm : Form
         label.MouseLeave += (_, _) => label.ForeColor = normalColor;
 
         return label;
-    }
-
-    private static Bitmap CreateBrandLogo(int size)
-    {
-        var bmp = new Bitmap(size, size);
-        using var g = Graphics.FromImage(bmp);
-        g.SmoothingMode = SmoothingMode.AntiAlias;
-        g.Clear(Color.Transparent);
-
-        var cell = Math.Max(6, size / 3);
-        using var blue = new SolidBrush(Color.FromArgb(37, 99, 235));
-        using var red = new SolidBrush(Color.FromArgb(220, 38, 38));
-
-        g.FillRectangle(blue, 2, 2, cell, cell);
-        g.FillRectangle(red, cell + 4, 2, cell, cell);
-        g.FillRectangle(red, 2, cell + 4, cell, cell);
-        g.FillRectangle(blue, cell + 4, cell + 4, cell, cell);
-
-        return bmp;
     }
 
     private static GraphicsPath CreateRoundedPath(Rectangle rect, int radius)
