@@ -15,8 +15,6 @@ namespace TuColmadoRD.Desktop;
 
 public partial class MainForm : Form
 {
-    public event EventHandler? Ready;
-
     private readonly string _startUrl;
     private readonly bool _openWebViewOnStart;
     private readonly bool _isTestBuild;
@@ -68,7 +66,6 @@ public partial class MainForm : Form
                 AppLogger.Error("Launcher initialization failed", ex);
                 ShowLauncher();
             }
-            Ready?.Invoke(this, EventArgs.Empty);
         };
 
         _refreshTimer.Tick += async (_, _) => await RefreshLauncherAsync();
@@ -83,8 +80,6 @@ public partial class MainForm : Form
         this.MinimumSize = new Size(800, 520);
         this.StartPosition = FormStartPosition.CenterScreen;
         this.Text = "TuColmadoRD - Punto de Venta";
-        this.Opacity = 1;
-        this.ShowInTaskbar = true;
 
         this.Icon = BrandAssets.CreateLogoIcon(32);
 
