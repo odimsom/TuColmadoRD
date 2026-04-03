@@ -1,9 +1,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using MediatR;
+using Microsoft.IdentityModel.Tokens;
 using TuColmadoRD.Core.Application.Commands.Tenancy;
+using TuColmadoRD.Infrastructure.IOC.ServiceRegistrations;
 
 namespace TuColmadoRD.Desktop;
 
@@ -63,9 +67,9 @@ public static class AuthLocalHostBuilder
             var command = new PairDeviceCommand(data.Email, data.Password, data.DeviceName);
             var result = await mediator.Send(command);
 
-            if (result.IsSuccessful)
+            if (result.IsGood)
             {
-                return Results.Ok(result.Value);
+                return Results.Ok(result.Result);
             }
             return Results.BadRequest(new { message = result.Error.ToString() });
         });
