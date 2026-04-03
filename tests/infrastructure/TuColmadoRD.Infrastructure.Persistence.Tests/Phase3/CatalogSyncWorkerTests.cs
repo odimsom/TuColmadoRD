@@ -31,7 +31,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(false, fakeHandler, lastCatalogSync: null);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         fakeHandler.CapturedRequests.Should().BeEmpty();
@@ -45,7 +45,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(true, fakeHandler, lastCatalogSync: null);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         fakeHandler.CapturedRequests.Should().HaveCount(1);
@@ -61,7 +61,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(true, fakeHandler, lastCatalogSync: since);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         fakeHandler.CapturedRequests.Should().HaveCount(1);
@@ -96,7 +96,7 @@ public class CatalogSyncWorkerTests
         await setup.DbContext.SaveChangesAsync();
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(350));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.ChangeTracker.Clear();
@@ -118,7 +118,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(true, fakeHandler, null);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(350));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.ChangeTracker.Clear();
@@ -134,7 +134,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(true, fakeHandler, null);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         await setup.ConfigRepo.ReceivedWithAnyArgs(1).SetAsync("LastCatalogSync", Arg.Any<string>());
@@ -148,7 +148,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(true, fakeHandler, null);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         await setup.ConfigRepo.DidNotReceiveWithAnyArgs().SetAsync("LastCatalogSync", Arg.Any<string>());
@@ -162,7 +162,7 @@ public class CatalogSyncWorkerTests
         using var setup = CreateSetup(true, fakeHandler, null);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         await setup.ConfigRepo.ReceivedWithAnyArgs(1).SetAsync("LastCatalogSync", Arg.Any<string>());

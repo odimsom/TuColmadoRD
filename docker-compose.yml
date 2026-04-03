@@ -18,26 +18,14 @@ services:
       context: .
       dockerfile: Dockerfile.gateway
     ports:
-      - "8090:8080"
+      - "8080:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:8080
-      - ReverseProxy__Clusters__api-cluster__Destinations__api-destination__Address=http://api:8080/
-      - ReverseProxy__Clusters__auth-cluster__Destinations__auth-destination__Address=http://auth:3000/
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.tucolmado-gateway.rule=Host(`tucolmadord.synsetsolutions.com`)"
-      - "traefik.http.routers.tucolmado-gateway.entrypoints=websecure"
-      - "traefik.http.routers.tucolmado-gateway.tls=true"
-      - "traefik.http.routers.tucolmado-gateway.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.tucolmado-gateway.tls.domains[0].main=tucolmadord.synsetsolutions.com"
-      - "traefik.http.services.tucolmado-gateway.loadbalancer.server.port=8080"
-    networks:
-      - tucolmadord-network
-      - dokploy-network
+      - GatewayOptions__AuthApiUrl=http://auth:3000
+      - GatewayOptions__CoreApiUrl=http://api:8080
+      - GatewayOptions__JwtSecret=${JWT_SECRET}
     depends_on:
-      - api
       - auth
+      - api
     restart: always
 
   api:

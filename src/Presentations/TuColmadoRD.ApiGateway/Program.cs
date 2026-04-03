@@ -1,44 +1,153 @@
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using TuColmadoRD.ApiGateway.Middlewares;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace TuColmadoRD.ApiGateway;
 
-builder.Services.AddMemoryCache();
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
-
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-app.MapGet("/", async (HttpContext ctx) =>
+public class GatewayOptions
 {
-    var header = ctx.Request.Headers.Authorization.ToString();
-    if (!header.StartsWith("Basic "))
+    public bool IsLocalMode { get; set; }
+    public string AuthApiUrl { get; set; } = "http://localhost:3000";
+    public string CoreApiUrl { get; set; } = "http://localhost:5000";
+    public string JwtSecret { get; set; } = "dominican-street-premium-secret-key-2026";
+    public string[] AllowedOrigins { get; set; } = Array.Empty<string>();
+}
+
+public static class GatewayHostBuilder
+{
+    public static WebApplication BuildGateway(string[] args, GatewayOptions? options = null)
     {
-        ctx.Response.Headers.WWWAuthenticate = "Basic realm=\"TuColmadoRD API\"";
-        ctx.Response.StatusCode = 401;
-        return;
+        var builder = WebApplication.CreateBuilder(args);
+
+        // 1. Load Configuration
+        var configOptions = builder.Configuration.GetSection("GatewayOptions").Get<GatewayOptions>() ?? new GatewayOptions();
+        var isLocal = options?.IsLocalMode ?? configOptions.IsLocalMode;
+        var authApiUrl = options?.AuthApiUrl ?? configOptions.AuthApiUrl;
+        var coreApiUrl = options?.CoreApiUrl ?? configOptions.CoreApiUrl;
+        var jwtSecret = options?.JwtSecret ?? configOptions.JwtSecret;
+        var allowedOrigins = options?.AllowedOrigins ?? configOptions.AllowedOrigins;
+
+        // 2. Register Services
+        builder.Services.AddMemoryCache();
+        builder.Services.AddHttpClient("AuthClient", client => client.BaseAddress = new Uri(authApiUrl));
+        builder.Services.AddHttpClient("CoreClient", client => client.BaseAddress = new Uri(coreApiUrl));
+
+        // 3. Configure Authentication
+        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(opt =>
+            {
+                opt.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret))
+                };
+            });
+
+        builder.Services.AddAuthorization();
+
+        // 4. Configure CORS
+        builder.Services.AddCors(opt =>
+        {
+            opt.AddDefaultPolicy(policy =>
+            {
+                policy.WithOrigins(allowedOrigins)
+                      .AllowAnyHeader()
+                      .AllowAnyMethod();
+            });
+        });
+
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+
+        var app = builder.Build();
+
+        // 5. Build Middlewares
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI();
+        }
+
+        app.UseCors();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseMiddleware<IdempotencyMiddleware>();
+
+        // 6. Endpoints
+
+        // AUTH GROUP
+        var authGroup = app.MapGroup("/gateway/auth");
+
+        authGroup.MapPost("/register", async (HttpContext ctx, IHttpClientFactory factory) => 
+            await ProxyRequest(ctx, factory.CreateClient("AuthClient"), "/auth/register"));
+
+        authGroup.MapPost("/login", async (HttpContext ctx, IHttpClientFactory factory) => 
+            await ProxyRequest(ctx, factory.CreateClient("AuthClient"), "/auth/login"));
+
+        // DEVICE PAIRING (Requires Auth)
+        app.MapPost("/gateway/devices/pair", async (HttpContext ctx, IHttpClientFactory factory) => 
+            await ProxyRequest(ctx, factory.CreateClient("AuthClient"), "/pair-device"))
+            .RequireAuthorization();
+
+        // GENERIC API PROXY (Requires Auth)
+        app.Map("/gateway/{**path}", async (string path, HttpContext ctx, IHttpClientFactory factory) => 
+        {
+            return await ProxyRequest(ctx, factory.CreateClient("CoreClient"), $"/{path}");
+        }).RequireAuthorization();
+
+        return app;
     }
 
-    var credentials = Encoding.UTF8.GetString(Convert.FromBase64String(header["Basic ".Length..]));
-    if (credentials != "admin:ArroZZ12hju.,")
+    private static async Task<IResult> ProxyRequest(HttpContext ctx, HttpClient client, string targetPath)
     {
-        ctx.Response.Headers.WWWAuthenticate = "Basic realm=\"TuColmadoRD API\"";
-        ctx.Response.StatusCode = 401;
-        return;
+        var request = ctx.Request;
+        var targetUri = new Uri(client.BaseAddress!, targetPath + request.QueryString);
+        
+        var proxyRequest = new HttpRequestMessage(new HttpMethod(request.Method), targetUri);
+
+        if (request.ContentLength > 0 || request.HasJsonContentType())
+        {
+            proxyRequest.Content = new StreamContent(request.Body);
+            if (request.ContentType != null)
+            {
+                proxyRequest.Content.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse(request.ContentType);
+            }
+        }
+
+        foreach (var header in request.Headers)
+        {
+            if (header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase)) continue;
+            
+            if (!proxyRequest.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string?>)header.Value) && proxyRequest.Content != null)
+            {
+                proxyRequest.Content.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string?>)header.Value);
+            }
+        }
+
+        try
+        {
+            var response = await client.SendAsync(proxyRequest, HttpCompletionOption.ResponseHeadersRead);
+            
+            return Microsoft.AspNetCore.Http.Results.Stream(
+                await response.Content.ReadAsStreamAsync(),
+                response.Content.Headers.ContentType?.ToString() ?? "application/json",
+                null,
+                (int)response.StatusCode
+            );
+        }
+        catch (Exception ex)
+        {
+            return Microsoft.AspNetCore.Http.Results.Json(new { message = ex.Message }, statusCode: 500);
+        }
     }
+}
 
-    var html = await File.ReadAllTextAsync(Path.Combine(app.Environment.WebRootPath, "index.html"));
-    ctx.Response.ContentType = "text/html";
-    await ctx.Response.WriteAsync(html);
-});
-
-app.UseSwaggerUI(c =>
+// Entry point for standalone running
+if (Environment.GetCommandLineArgs().Any(a => a.Contains("TuColmadoRD.ApiGateway.dll")))
 {
-    c.SwaggerEndpoint("/api-swagger/v1/swagger.json", ".NET API (TuColmadoRD)");
-    c.SwaggerEndpoint("/auth-swagger/swagger.json", "Node.js Auth API");
-    c.RoutePrefix = "swagger";
-});
-
-app.UseMiddleware<IdempotencyMiddleware>();
+    GatewayHostBuilder.BuildGateway(Environment.GetCommandLineArgs()).Run();
+}

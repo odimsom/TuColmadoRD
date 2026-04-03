@@ -12,6 +12,7 @@
   <Folder Name="/src/Presentations/">
     <Project Path="src/Presentations/TuColmadoRD.Presentation.API/TuColmadoRD.Presentation.API.csproj" />
     <Project Path="src/Presentations/TuColmadoRD.ApiGateway/TuColmadoRD.ApiGateway.csproj" />
+    <Project Path="src/Presentations/TuColmadoRD.Desktop/TuColmadoRD.Desktop.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/core/TuColmadoRD.Core.Domain.Tests/TuColmadoRD.Core.Domain.Tests.csproj" />

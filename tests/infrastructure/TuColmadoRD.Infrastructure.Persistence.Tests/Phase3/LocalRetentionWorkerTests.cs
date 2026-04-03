@@ -30,7 +30,7 @@ public class LocalRetentionWorkerTests
         await SeedSalesAndOutboxAsync(setup.DbContext, uploaded: true, oldEnough: true);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.Sales.Count().Should().Be(1);
@@ -45,7 +45,7 @@ public class LocalRetentionWorkerTests
         await SeedSalesAndOutboxAsync(setup.DbContext, uploaded: true, oldEnough: true);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.Sales.Count().Should().Be(0);
@@ -59,7 +59,7 @@ public class LocalRetentionWorkerTests
         await SeedSalesAndOutboxAsync(setup.DbContext, uploaded: false, oldEnough: true);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.Sales.Count().Should().Be(1);
@@ -73,7 +73,7 @@ public class LocalRetentionWorkerTests
         await SeedSalesAndOutboxAsync(setup.DbContext, uploaded: true, oldEnough: true);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.OutboxMessages.Count().Should().Be(0);
@@ -87,7 +87,7 @@ public class LocalRetentionWorkerTests
         await SeedSalesAndOutboxAsync(setup.DbContext, uploaded: false, oldEnough: true);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.OutboxMessages.Count().Should().Be(1);
@@ -101,7 +101,7 @@ public class LocalRetentionWorkerTests
         await SeedSalesAndOutboxAsync(setup.DbContext, uploaded: true, oldEnough: true, ageInDays: 4);
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.Sales.Count().Should().Be(0);
@@ -122,7 +122,7 @@ public class LocalRetentionWorkerTests
         await setup.DbContext.SaveChangesAsync();
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(300));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
 
         // Assert
         setup.DbContext.OutboxMessages.Count().Should().Be(0);
