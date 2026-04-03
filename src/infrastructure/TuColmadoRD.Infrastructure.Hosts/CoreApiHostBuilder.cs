@@ -7,23 +7,11 @@ using TuColmadoRD.Infrastructure.IOC.ServiceRegistrations;
 using TuColmadoRD.Presentation.API.Endpoints.Customers;
 using TuColmadoRD.Presentation.API.Endpoints.Expenses;
 using TuColmadoRD.Presentation.API.Endpoints.Inventory;
-using TuColmadoRD.Presentation.API.Endpoints.Purchasing;
 using TuColmadoRD.Presentation.API.Endpoints.Sales;
 using TuColmadoRD.Presentation.API.Endpoints.Sales.Shifts;
+using TuColmadoRD.Presentation.API.Endpoints.Purchasing;
 
-namespace TuColmadoRD.Presentation.API;
-
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        // Entry point for standalone running
-        if (args.Any(a => a.Contains("TuColmadoRD.Presentation.API.dll")) || args.Length == 0)
-        {
-            CoreApiHostBuilder.BuildCoreApi(args).Run();
-        }
-    }
-}
+namespace TuColmadoRD.Infrastructure.Hosts;
 
 public static class CoreApiHostBuilder
 {
@@ -43,6 +31,7 @@ public static class CoreApiHostBuilder
         builder.Services.AddSwaggerGen();
         builder.Services.AddAuthorization();
 
+        // Services registrations
         builder.Services.AddGlobalServices(builder.Configuration);
         builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(CoreApiHostBuilder).Assembly));
 

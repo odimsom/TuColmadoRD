@@ -21,6 +21,8 @@ namespace TuColmadoRD.Tests.Phase3;
 
 public class OutboxWorkerTests
 {
+    private const int WorkerRunWindowMilliseconds = 900;
+
     [Fact]
     public async Task ExecuteAsync_WhenNotConnected_DoesNotQueryOutbox()
     {
@@ -34,7 +36,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();
@@ -72,7 +74,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         processedIds.Should().HaveCount(2);
@@ -93,7 +95,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();
@@ -114,7 +116,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();
@@ -138,7 +140,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();
@@ -161,7 +163,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();
@@ -194,7 +196,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();
@@ -217,7 +219,7 @@ public class OutboxWorkerTests
         }
 
         // Act
-        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(1500));
+        await setup.Worker.RunForAsync(TimeSpan.FromMilliseconds(WorkerRunWindowMilliseconds));
 
         // Assert
         await using var verify = setup.CreateDbContext();

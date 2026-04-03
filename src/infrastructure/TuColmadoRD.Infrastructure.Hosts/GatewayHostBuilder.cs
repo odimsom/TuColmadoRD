@@ -8,19 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using TuColmadoRD.ApiGateway.Middlewares;
 
-namespace TuColmadoRD.ApiGateway;
-
-public class Program
-{
-    public static void Main(string[] args)
-    {
-        // Entry point for standalone running
-        if (args.Any(a => a.Contains("TuColmadoRD.ApiGateway.dll")) || args.Length == 0)
-        {
-            GatewayHostBuilder.BuildGateway(args).Run();
-        }
-    }
-}
+namespace TuColmadoRD.Infrastructure.Hosts;
 
 public class GatewayOptions
 {
@@ -37,16 +25,20 @@ public static class GatewayHostBuilder
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        // 1. Load Configuration
         var configOptions = builder.Configuration.GetSection("GatewayOptions").Get<GatewayOptions>() ?? new GatewayOptions();
+        var isLocal = options?.IsLocalMode ?? configOptions.IsLocalMode;
         var authApiUrl = options?.AuthApiUrl ?? configOptions.AuthApiUrl;
         var coreApiUrl = options?.CoreApiUrl ?? configOptions.CoreApiUrl;
         var jwtSecret = options?.JwtSecret ?? configOptions.JwtSecret;
         var allowedOrigins = options?.AllowedOrigins ?? configOptions.AllowedOrigins;
 
+        // 2. Register Services
         builder.Services.AddMemoryCache();
         builder.Services.AddHttpClient("AuthClient", client => client.BaseAddress = new Uri(authApiUrl));
         builder.Services.AddHttpClient("CoreClient", client => client.BaseAddress = new Uri(coreApiUrl));
 
+        // 3. Configure Authentication
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(opt =>
             {
@@ -62,6 +54,7 @@ public static class GatewayHostBuilder
 
         builder.Services.AddAuthorization();
 
+        // 4. Configure CORS
         builder.Services.AddCors(opt =>
         {
             opt.AddDefaultPolicy(policy =>
@@ -77,6 +70,7 @@ public static class GatewayHostBuilder
 
         var app = builder.Build();
 
+        // 5. Build Middlewares
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
@@ -88,19 +82,24 @@ public static class GatewayHostBuilder
         app.UseAuthorization();
         app.UseMiddleware<IdempotencyMiddleware>();
 
+        // 6. Endpoints
+
+        // AUTH GROUP
         var authGroup = app.MapGroup("/gateway/auth");
 
-        authGroup.MapPost("/register", async (HttpContext ctx, IHttpClientFactory factory) =>
+        authGroup.MapPost("/register", async (HttpContext ctx, IHttpClientFactory factory) => 
             await ProxyRequest(ctx, factory.CreateClient("AuthClient"), "/auth/register"));
 
-        authGroup.MapPost("/login", async (HttpContext ctx, IHttpClientFactory factory) =>
+        authGroup.MapPost("/login", async (HttpContext ctx, IHttpClientFactory factory) => 
             await ProxyRequest(ctx, factory.CreateClient("AuthClient"), "/auth/login"));
 
-        app.MapPost("/gateway/devices/pair", async (HttpContext ctx, IHttpClientFactory factory) =>
+        // DEVICE PAIRING (Requires Auth)
+        app.MapPost("/gateway/devices/pair", async (HttpContext ctx, IHttpClientFactory factory) => 
             await ProxyRequest(ctx, factory.CreateClient("AuthClient"), "/pair-device"))
             .RequireAuthorization();
 
-        app.Map("/gateway/{**path}", async (string path, HttpContext ctx, IHttpClientFactory factory) =>
+        // GENERIC API PROXY (Requires Auth)
+        app.Map("/gateway/{**path}", async (string path, HttpContext ctx, IHttpClientFactory factory) => 
         {
             return await ProxyRequest(ctx, factory.CreateClient("CoreClient"), $"/{path}");
         }).RequireAuthorization();
@@ -112,7 +111,7 @@ public static class GatewayHostBuilder
     {
         var request = ctx.Request;
         var targetUri = new Uri(client.BaseAddress!, targetPath + request.QueryString);
-
+        
         var proxyRequest = new HttpRequestMessage(new HttpMethod(request.Method), targetUri);
 
         if (request.ContentLength > 0 || request.HasJsonContentType())
@@ -126,11 +125,8 @@ public static class GatewayHostBuilder
 
         foreach (var header in request.Headers)
         {
-            if (header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase))
-            {
-                continue;
-            }
-
+            if (header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase)) continue;
+            
             if (!proxyRequest.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string?>)header.Value) && proxyRequest.Content != null)
             {
                 proxyRequest.Content.Headers.TryAddWithoutValidation(header.Key, (IEnumerable<string?>)header.Value);
@@ -140,7 +136,7 @@ public static class GatewayHostBuilder
         try
         {
             var response = await client.SendAsync(proxyRequest, HttpCompletionOption.ResponseHeadersRead);
-
+            
             ctx.Response.StatusCode = (int)response.StatusCode;
             return Microsoft.AspNetCore.Http.Results.Stream(
                 await response.Content.ReadAsStreamAsync(),
