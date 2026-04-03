@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Drawing;
+using System.Diagnostics;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
@@ -9,11 +10,14 @@ namespace TuColmadoRD.Desktop;
 
 public partial class MainForm : Form
 {
-    private Microsoft.Web.WebView2.WinForms.WebView2 _webView;
-    private Panel _splashPanel;
+    private Microsoft.Web.WebView2.WinForms.WebView2 _webView = null!;
+    private Panel _splashPanel = null!;
+    private Label _statusLabel = null!;
+    private Panel _actionPanel = null!;
     private readonly string _startUrl;
     private bool _updateCheckStarted;
     private bool _webViewInitialized;
+    private bool _navigationCompletedSuccessfully;
 
     public MainForm(string startUrl)
     {
@@ -28,6 +32,12 @@ public partial class MainForm : Form
 
             _webViewInitialized = true;
             await ConfigureWebViewAsync();
+
+            if (!_updateCheckStarted)
+            {
+                _updateCheckStarted = true;
+                _ = CheckForUpdatesAsync();
+            }
         };
     }
 
@@ -37,15 +47,7 @@ public partial class MainForm : Form
         this.Size = new Size(1280, 800);
         this.MinimumSize = new Size(1024, 600);
         this.StartPosition = FormStartPosition.CenterScreen;
-        var appIconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
-        if (File.Exists(appIconPath))
-        {
-            this.Icon = new Icon(appIconPath);
-        }
-        else
-        {
-            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
-        }
+        this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
 
         // Splash Panel
         _splashPanel = new Panel
@@ -71,7 +73,7 @@ public partial class MainForm : Form
             TextAlign = ContentAlignment.MiddleCenter
         };
         
-        var lblStatus = new Label
+        _statusLabel = new Label
         {
             Text = "Iniciando servicios locales...",
             ForeColor = Color.FromArgb(148, 163, 184), // slate-400
@@ -88,10 +90,14 @@ public partial class MainForm : Form
             MarqueeAnimationSpeed = 30
         };
 
+        _actionPanel = BuildActionPanel();
+        _actionPanel.Visible = false;
+
         _splashPanel.Controls.Add(logoBox);
         _splashPanel.Controls.Add(lblTitle);
-        _splashPanel.Controls.Add(lblStatus);
+        _splashPanel.Controls.Add(_statusLabel);
         _splashPanel.Controls.Add(progressBar);
+        _splashPanel.Controls.Add(_actionPanel);
 
         this.Controls.Add(_splashPanel);
 
@@ -100,8 +106,9 @@ public partial class MainForm : Form
         {
             logoBox.Location = new Point((this.ClientSize.Width - logoBox.Width) / 2, (this.ClientSize.Height - logoBox.Height) / 2 - 130);
             lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, logoBox.Bottom + 12);
-            lblStatus.Location = new Point((this.ClientSize.Width - lblStatus.Width) / 2, lblTitle.Bottom + 10);
-            progressBar.Location = new Point((this.ClientSize.Width - progressBar.Width) / 2, lblStatus.Bottom + 30);
+            _statusLabel.Location = new Point((this.ClientSize.Width - _statusLabel.Width) / 2, lblTitle.Bottom + 10);
+            progressBar.Location = new Point((this.ClientSize.Width - progressBar.Width) / 2, _statusLabel.Bottom + 30);
+            _actionPanel.Location = new Point((this.ClientSize.Width - _actionPanel.Width) / 2, progressBar.Bottom + 24);
         };
 
         // WebView2
@@ -134,6 +141,10 @@ public partial class MainForm : Form
     {
         try
         {
+            _statusLabel.Text = "Iniciando servicios locales...";
+            _actionPanel.Visible = false;
+            _navigationCompletedSuccessfully = false;
+
             var userDataFolder = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
                 "TuColmadoRD",
@@ -154,25 +165,95 @@ public partial class MainForm : Form
             _webView.CoreWebView2.Settings.AreDevToolsEnabled = false;
             #endif
 
+            _webView.NavigationCompleted -= OnNavigationCompleted;
+            _webView.NavigationCompleted += OnNavigationCompleted;
             _webView.Source = new Uri(_startUrl);
-            
-            // Wait for first load
-            _webView.NavigationCompleted += (s, e) =>
-            {
-                _splashPanel.Visible = false;
-                _webView.Visible = true;
 
-                if (!_updateCheckStarted)
+            _ = Task.Run(async () =>
+            {
+                await Task.Delay(15000);
+                if (!_navigationCompletedSuccessfully && !IsDisposed)
                 {
-                    _updateCheckStarted = true;
-                    _ = CheckForUpdatesAsync();
+                    BeginInvoke(new Action(() =>
+                    {
+                        _statusLabel.Text = "La vista local no respondio a tiempo. Use las opciones para continuar.";
+                        _actionPanel.Visible = true;
+                    }));
                 }
-            };
+            });
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Error al iniciar WebView2: {ex.Message}", "TuColmadoRD Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            _statusLabel.Text = $"Error al iniciar WebView2: {ex.Message}";
+            _actionPanel.Visible = true;
         }
+    }
+
+    private void OnNavigationCompleted(object? sender, CoreWebView2NavigationCompletedEventArgs e)
+    {
+        if (e.IsSuccess)
+        {
+            _navigationCompletedSuccessfully = true;
+            _splashPanel.Visible = false;
+            _webView.Visible = true;
+            return;
+        }
+
+        _statusLabel.Text = "No se pudo cargar la pagina principal local.";
+        _actionPanel.Visible = true;
+    }
+
+    private Panel BuildActionPanel()
+    {
+        var panel = new Panel
+        {
+            Size = new Size(560, 84),
+            BackColor = Color.FromArgb(20, 30, 52)
+        };
+
+        var openPortalButton = new Button
+        {
+            Text = "Abrir Portal Local",
+            Width = 170,
+            Height = 34,
+            Left = 14,
+            Top = 24
+        };
+        openPortalButton.Click += (_, _) => OpenExternalUrl("http://localhost:5100/");
+
+        var openApiButton = new Button
+        {
+            Text = "Abrir API Local",
+            Width = 170,
+            Height = 34,
+            Left = 195,
+            Top = 24
+        };
+        openApiButton.Click += (_, _) => OpenExternalUrl("http://localhost:5200/swagger");
+
+        var retryButton = new Button
+        {
+            Text = "Reintentar",
+            Width = 170,
+            Height = 34,
+            Left = 376,
+            Top = 24
+        };
+        retryButton.Click += async (_, _) => await ConfigureWebViewAsync();
+
+        panel.Controls.Add(openPortalButton);
+        panel.Controls.Add(openApiButton);
+        panel.Controls.Add(retryButton);
+        return panel;
+    }
+
+    private static void OpenExternalUrl(string url)
+    {
+        Process.Start(new ProcessStartInfo
+        {
+            FileName = url,
+            UseShellExecute = true
+        });
     }
 
     public void ShowWebView()
