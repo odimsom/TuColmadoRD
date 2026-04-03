@@ -1,42 +1,51 @@
-TERMINOS Y CONDICIONES - TU COLMADO RD
-
+TERMINOS Y CONDICIONES DE LICENCIA DE SOFTWARE
+Producto: TuColmadoRD
+Proveedor: Synset Solutions
 Fecha de vigencia: 02/04/2026
 
-Al instalar o usar Tu Colmado RD, usted acepta estos terminos.
+AVISO IMPORTANTE
+Lea este documento completo antes de instalar o usar el software.
+Al seleccionar "Acepto el acuerdo" y continuar con la instalacion, usted declara
+que ha leido, entendido y aceptado estos terminos y condiciones.
 
-1. LICENCIA DE USO
-- Se concede una licencia no exclusiva y no transferible para uso comercial interno del negocio.
-- Esta licencia no permite revender, sublicenciar, descompilar o modificar el software sin autorizacion escrita.
+1. OBJETO DE LA LICENCIA
+1.1 Se concede al cliente una licencia de uso no exclusiva, revocable y no transferible.
+1.2 La licencia autoriza el uso interno del software para la operacion del negocio.
 
-2. USO PERMITIDO
-- El sistema debe usarse conforme a la ley aplicable en Republica Dominicana.
-- El usuario es responsable de la veracidad de la informacion que registra en la plataforma.
+2. RESTRICCIONES
+2.1 Queda prohibido revender, sublicenciar o distribuir el software sin autorizacion escrita.
+2.2 Queda prohibido descompilar, desensamblar o modificar el software, salvo permiso legal expreso.
 
-3. ACTIVACION Y CUENTA
-- Algunas funciones pueden requerir vinculacion del dispositivo y autenticacion.
-- El cliente es responsable de proteger sus credenciales y acceso al equipo.
+3. ACTIVACION Y SEGURIDAD
+3.1 Algunas funcionalidades requieren autenticacion, vinculacion de dispositivo y acceso autorizado.
+3.2 El cliente es responsable del resguardo de credenciales, equipos y accesos.
 
-4. DATOS Y PRIVACIDAD
-- El usuario conserva la responsabilidad sobre los datos de su negocio.
-- Se recomienda realizar respaldos periodicos para evitar perdida de informacion.
+4. DATOS Y RESPALDO
+4.1 Los datos operativos del negocio son responsabilidad del cliente.
+4.2 El cliente debe realizar respaldos periodicos para proteger su informacion.
 
 5. ACTUALIZACIONES
-- Tu Colmado RD puede incluir mejoras y actualizaciones tecnicas.
-- Algunas actualizaciones pueden requerir reinstalacion o mantenimiento temporal del servicio.
+5.1 El proveedor puede publicar mejoras, parches y actualizaciones de seguridad.
+5.2 Algunas actualizaciones pueden requerir mantenimiento temporal o reinstalacion.
 
-6. SOPORTE
-- Soporte oficial: https://wa.me/18296932458
-- Horarios y alcance del soporte pueden variar segun el plan contratado.
+6. SOPORTE TECNICO
+6.1 Canal oficial: https://wa.me/18296932458
+6.2 El alcance y horario del soporte dependen del plan o acuerdo comercial vigente.
 
 7. LIMITACION DE RESPONSABILIDAD
-- El software se entrega "tal cual" para uso comercial.
-- Synset Solutions no sera responsable por danos indirectos, lucro cesante o perdida de datos por uso indebido, fallas de terceros, electricidad, red o hardware.
+7.1 El software se proporciona "tal cual", dentro de los limites permitidos por la ley.
+7.2 Synset Solutions no sera responsable por danos indirectos, lucro cesante,
+	perdida de informacion o interrupciones causadas por terceros, red, energia,
+	hardware, uso indebido o incumplimiento de buenas practicas operativas.
 
 8. TERMINACION
-- El incumplimiento de estos terminos puede suspender o revocar la licencia de uso.
+8.1 El incumplimiento de estos terminos puede causar suspension o terminacion de la licencia.
 
-9. ACEPTACION
-- Si no esta de acuerdo con estos terminos, no instale ni utilice el software.
+9. LEGISLACION APLICABLE
+9.1 Este acuerdo se interpreta conforme a la normativa aplicable en Republica Dominicana.
+
+10. NO ACEPTACION
+10.1 Si no esta de acuerdo con este documento, no instale ni utilice el software.
 
 Synset Solutions
 https://tucolmadord.com
