@@ -63,6 +63,8 @@ public static class CoreApiHostBuilder
         }
         app.UseMiddleware<SubscriptionGuardMiddleware>();
 
+        app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
         app.MapInventoryEndpoints();
         app.MapPurchasingEndpoints();
         app.MapCustomerEndpoints();
