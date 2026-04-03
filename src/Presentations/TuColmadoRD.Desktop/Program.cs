@@ -52,7 +52,7 @@ static class Program
 
         // 5. Run WinForms
         var hasIdentity = HasDeviceIdentity();
-        var startUrl = hasIdentity ? "http://localhost:5100/portal/dashboard" : "http://localhost:5100/setup";
+        var startUrl = "http://localhost:5100/auth/login";
 
         splash.Hide();
         var mainForm = new MainForm(startUrl, openWebViewOnStart: !hasIdentity);

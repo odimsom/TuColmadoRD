@@ -7,10 +7,31 @@ namespace TuColmadoRD.Desktop;
 
 internal static class UpdateService
 {
+    private const string LocalLatestInstallerApi = "http://localhost:5100/gateway/updates/latest-installer";
     private const string ReleasesUrl = "https://api.github.com/repos/odimsom/TuColmadoRD.Frontend/releases";
 
     public static async Task<UpdateCheckResult> CheckForUpdateAsync()
     {
+        var localResolved = await TryResolveLatestInstallerFromLocalApiAsync();
+        if (localResolved != null)
+        {
+            var current = GetCurrentVersion();
+            var isTestTag = localResolved.Tag.Contains("-test", StringComparison.OrdinalIgnoreCase);
+            var hasNewerVersion = localResolved.Version > current;
+
+            if (isTestTag || hasNewerVersion)
+            {
+                return new UpdateCheckResult
+                {
+                    IsUpdateAvailable = true,
+                    LatestVersion = localResolved.Version.ToString(),
+                    InstallerUrl = localResolved.InstallerUrl
+                };
+            }
+
+            return UpdateCheckResult.NoUpdate;
+        }
+
         using var http = new HttpClient();
         http.DefaultRequestHeaders.UserAgent.ParseAdd("TuColmadoRD-Desktop-Updater/1.0");
 
@@ -56,6 +77,80 @@ internal static class UpdateService
             LatestVersion = latest.Version!.ToString(),
             InstallerUrl = installerAsset?.BrowserDownloadUrl
         };
+    }
+
+    private static async Task<ResolvedInstaller?> TryResolveLatestInstallerFromLocalApiAsync()
+    {
+        try
+        {
+            var channel = IsTestBuild() ? "test" : "production";
+
+            using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(3) };
+            using var response = await http.GetAsync($"{LocalLatestInstallerApi}?channel={channel}");
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
+
+            await using var stream = await response.Content.ReadAsStreamAsync();
+            var payload = await JsonSerializer.DeserializeAsync<LatestInstallerPayload>(stream, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (payload == null || string.IsNullOrWhiteSpace(payload.InstallerUrl) || string.IsNullOrWhiteSpace(payload.Tag))
+            {
+                return null;
+            }
+
+            var version = ParseVersion(payload.Tag);
+            if (version == null)
+            {
+                return null;
+            }
+
+            return new ResolvedInstaller
+            {
+                Tag = payload.Tag,
+                Version = version,
+                InstallerUrl = payload.InstallerUrl
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static bool IsTestBuild()
+    {
+        if (string.Equals(Environment.GetEnvironmentVariable("RELEASE_TYPE"), "test", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        try
+        {
+            var configPath = Path.Combine(AppContext.BaseDirectory, "appsettings.json");
+            if (!File.Exists(configPath))
+            {
+                return false;
+            }
+
+            using var stream = File.OpenRead(configPath);
+            using var doc = JsonDocument.Parse(stream);
+            if (doc.RootElement.TryGetProperty("AppSettings", out var settings) &&
+                settings.TryGetProperty("IsTestBuild", out var testNode))
+            {
+                return string.Equals(testNode.GetString(), "true", StringComparison.OrdinalIgnoreCase);
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return false;
     }
 
     public static async Task<string> DownloadInstallerAsync(string installerUrl)
@@ -133,6 +228,19 @@ internal static class UpdateService
     private sealed class GitHubAsset
     {
         public string BrowserDownloadUrl { get; set; } = string.Empty;
+    }
+
+    private sealed class LatestInstallerPayload
+    {
+        public string Tag { get; set; } = string.Empty;
+        public string InstallerUrl { get; set; } = string.Empty;
+    }
+
+    private sealed class ResolvedInstaller
+    {
+        public string Tag { get; set; } = string.Empty;
+        public Version Version { get; set; } = new Version(0, 0, 0, 0);
+        public string InstallerUrl { get; set; } = string.Empty;
     }
 }
 
