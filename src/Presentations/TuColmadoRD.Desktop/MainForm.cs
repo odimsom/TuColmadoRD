@@ -15,6 +15,8 @@ namespace TuColmadoRD.Desktop;
 
 public partial class MainForm : Form
 {
+    public event EventHandler? Ready;
+
     private readonly string _startUrl;
     private readonly bool _openWebViewOnStart;
     private readonly bool _isTestBuild;
@@ -46,6 +48,8 @@ public partial class MainForm : Form
         _startUrl = startUrl;
         _openWebViewOnStart = openWebViewOnStart;
         _isTestBuild = ReadIsTestBuild();
+        this.Opacity = 0;
+        this.ShowInTaskbar = false;
 
         InitializeComponent();
 
@@ -66,6 +70,9 @@ public partial class MainForm : Form
                 AppLogger.Error("Launcher initialization failed", ex);
                 ShowLauncher();
             }
+            this.Opacity = 1;
+            this.ShowInTaskbar = true;
+            Ready?.Invoke(this, EventArgs.Empty);
         };
 
         _refreshTimer.Tick += async (_, _) => await RefreshLauncherAsync();

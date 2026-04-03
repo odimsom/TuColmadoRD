@@ -66,9 +66,9 @@ static class Program
         var startUrl = "http://localhost:5100/auth/login";
 
         var mainForm = new MainForm(startUrl, openWebViewOnStart: !hasIdentity);
-        mainForm.Shown += (_, _) =>
+        mainForm.Ready += (_, _) =>
         {
-            AppLogger.Info("Main form shown");
+            AppLogger.Info("Main form ready");
             splash.Close();
         };
         Application.Run(mainForm);
