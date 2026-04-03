@@ -1,4 +1,5 @@
 using System.Text;
+using System.IO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -36,6 +37,9 @@ public static class GatewayHostBuilder
     public static WebApplication BuildGateway(string[] args, GatewayOptions? options = null)
     {
         var builder = WebApplication.CreateBuilder(args);
+        var webRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot");
+        Directory.CreateDirectory(webRootPath);
+        builder.WebHost.UseWebRoot(webRootPath);
 
         var configOptions = builder.Configuration.GetSection("GatewayOptions").Get<GatewayOptions>() ?? new GatewayOptions();
         var authApiUrl = options?.AuthApiUrl ?? configOptions.AuthApiUrl;
