@@ -9,6 +9,7 @@ on:
     types: [opened, synchronize, closed]
   push:
     branches:
+      - Develop
       - QA
   workflow_dispatch:
 
