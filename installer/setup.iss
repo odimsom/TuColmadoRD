@@ -64,9 +64,9 @@ WizardSmallImageFile={#WizardSmallImagePath}
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Crear icono en el escritorio"; Flags: checkedonce
+Name: "desktopicon"; Description: "Crear icono en el escritorio"
 Name: "startupicon"; Description: "Iniciar TuColmadoRD con Windows"; Flags: unchecked
-Name: "launchapp"; Description: "Abrir TuColmadoRD al finalizar la instalacion"; Flags: checkedonce
+Name: "launchapp"; Description: "Abrir TuColmadoRD al finalizar la instalacion"
 
 [Files]
 Source: "../publish/desktop/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
