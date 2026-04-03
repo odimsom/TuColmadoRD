@@ -1,6 +1,7 @@
 using System.Text;
 using System.IO;
 using System.Net;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -106,6 +107,75 @@ public static class GatewayHostBuilder
             }
         });
 
+        app.MapGet("/gateway/updates/latest-installer", async (string? channel) =>
+        {
+            var selectedChannel = string.Equals(channel, "production", StringComparison.OrdinalIgnoreCase) ? "production" : "test";
+
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(5) };
+                http.DefaultRequestHeaders.UserAgent.ParseAdd("TuColmadoRD-Gateway/1.0");
+
+                using var response = await http.GetAsync("https://api.github.com/repos/odimsom/TuColmadoRD.Frontend/releases");
+                response.EnsureSuccessStatusCode();
+
+                await using var stream = await response.Content.ReadAsStreamAsync();
+                var releases = await JsonSerializer.DeserializeAsync<List<GitHubRelease>>(stream, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new List<GitHubRelease>();
+
+                static Version? ParseVersion(string? tag)
+                {
+                    if (string.IsNullOrWhiteSpace(tag)) return null;
+                    var clean = tag.Trim();
+                    if (clean.StartsWith("v", StringComparison.OrdinalIgnoreCase)) clean = clean[1..];
+                    var dash = clean.IndexOf('-');
+                    if (dash >= 0) clean = clean[..dash];
+                    return Version.TryParse(clean, out var version) ? version : null;
+                }
+
+                var filtered = releases
+                    .Where(r => !string.IsNullOrWhiteSpace(r.TagName))
+                    .Where(r =>
+                    {
+                        var isTestTag = r.TagName!.Contains("-test", StringComparison.OrdinalIgnoreCase) || r.Prerelease;
+                        return selectedChannel == "test" ? isTestTag : !isTestTag;
+                    })
+                    .Select(r => new
+                    {
+                        Release = r,
+                        Version = ParseVersion(r.TagName)
+                    })
+                    .Where(x => x.Version != null)
+                    .OrderByDescending(x => x.Version)
+                    .FirstOrDefault();
+
+                if (filtered == null)
+                {
+                    return Results.NotFound(new { message = "No release found for channel", channel = selectedChannel });
+                }
+
+                var installer = filtered.Release.Assets.FirstOrDefault(a => a.BrowserDownloadUrl.EndsWith(".exe", StringComparison.OrdinalIgnoreCase));
+                if (installer == null)
+                {
+                    return Results.NotFound(new { message = "Installer asset not found", tag = filtered.Release.TagName });
+                }
+
+                return Results.Ok(new
+                {
+                    channel = selectedChannel,
+                    tag = filtered.Release.TagName,
+                    version = filtered.Version!.ToString(),
+                    installerUrl = installer.BrowserDownloadUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(detail: ex.Message, title: "Unable to resolve latest installer");
+            }
+        });
+
         var authGroup = app.MapGroup("/gateway/auth");
 
         authGroup.MapPost("/register", async (HttpContext ctx, IHttpClientFactory factory) =>
@@ -169,5 +239,17 @@ public static class GatewayHostBuilder
         {
             return Microsoft.AspNetCore.Http.Results.Json(new { message = ex.Message }, statusCode: 500);
         }
+    }
+
+    private sealed class GitHubRelease
+    {
+        public string? TagName { get; set; }
+        public bool Prerelease { get; set; }
+        public List<GitHubAsset> Assets { get; set; } = new();
+    }
+
+    private sealed class GitHubAsset
+    {
+        public string BrowserDownloadUrl { get; set; } = string.Empty;
     }
 }
