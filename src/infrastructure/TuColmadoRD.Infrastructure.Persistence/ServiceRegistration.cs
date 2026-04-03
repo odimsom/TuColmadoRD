@@ -34,36 +34,40 @@ public static class ServiceRegistration
     {
 
         #region Database Context Registration
-        var environment = configuration["ASPNETCORE_ENVIRONMENT"]
-            ?? Environments.Production;
+        var postgresConnection = configuration.GetConnectionString("PostgresSQLConnectionString");
+        var sqlServerConnection = configuration.GetConnectionString("SQLServerConnectionString");
+        var enableInMemoryFallback = configuration.GetValue<bool>("Persistence:EnableInMemoryFallback");
 
-        var isDevelopment = environment.Equals(
-            Environments.Development,
-            StringComparison.OrdinalIgnoreCase
-        );
-
-        if (isDevelopment)
+        services.AddDbContext<TuColmadoDbContext>(options =>
         {
-            services.AddDbContext<TuColmadoDbContext>(options =>
-                options.UseSqlServer(
-                    configuration.GetConnectionString("SQLServerConnectionString")
-                    ?? throw new InvalidOperationException("Connection string 'SQLServerConnectionString' not found."),
-                    sqlOptions =>
-                        sqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
-                )
-            );
-        }
-        else
-        {
-            services.AddDbContext<TuColmadoDbContext>(options =>
+            if (!string.IsNullOrWhiteSpace(postgresConnection))
+            {
                 options.UseNpgsql(
-                    configuration.GetConnectionString("PostgresSQLConnectionString")
-                    ?? throw new InvalidOperationException("Connection string 'PostgresSQLConnectionString' not found."),
-                    npgsqlOptions =>
-                        npgsqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
-                )
+                    postgresConnection,
+                    npgsqlOptions => npgsqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
+                );
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(sqlServerConnection))
+            {
+                options.UseSqlServer(
+                    sqlServerConnection,
+                    sqlOptions => sqlOptions.MigrationsAssembly(typeof(TuColmadoDbContext).Assembly.FullName)
+                );
+                return;
+            }
+
+            if (enableInMemoryFallback)
+            {
+                options.UseInMemoryDatabase("TuColmadoRD.Local");
+                return;
+            }
+
+            throw new InvalidOperationException(
+                "Connection strings 'PostgresSQLConnectionString' and 'SQLServerConnectionString' not found."
             );
-        }
+        });
         #endregion
 
         // Repositories Configuration

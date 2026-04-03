@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>..\..\..\installer\assets\app.ico</ApplicationIcon>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
@@ -19,9 +20,13 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
-    <ProjectReference Include="..\TuColmadoRD.ApiGateway\TuColmadoRD.ApiGateway.csproj" />
-    <ProjectReference Include="..\TuColmadoRD.Presentation.API\TuColmadoRD.Presentation.API.csproj" />
+    <ProjectReference Include="..\TuColmadoRD.ApiGateway\TuColmadoRD.ApiGateway.csproj" Properties="Configuration=DesktopPublish" />
+    <ProjectReference Include="..\TuColmadoRD.Presentation.API\TuColmadoRD.Presentation.API.csproj" Properties="Configuration=DesktopPublish" />
     <ProjectReference Include="..\..\infrastructure\TuColmadoRD.Infrastructure.IOC\TuColmadoRD.Infrastructure.IOC.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\**\*" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

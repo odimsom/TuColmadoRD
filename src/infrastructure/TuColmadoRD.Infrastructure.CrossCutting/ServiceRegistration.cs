@@ -48,10 +48,14 @@ public static class ServiceRegistration
         services.AddKeyedScoped<TuColmadoRD.Core.Application.Interfaces.Sync.IOutboxMessageHandler, TuColmadoRD.Infrastructure.CrossCutting.Sync.ExpenseCreatedOutboxHandler>("ExpenseCreated");
         services.AddScoped<TuColmadoRD.Core.Application.Handlers.Sync.OutboxMessageDispatcher>();
 
-        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.OutboxWorker>();
-        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.LocalRetentionWorker>();
-        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.CatalogSyncWorker>();
-        services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.InventorySyncWorker>();
+        var backgroundWorkersEnabled = configuration.GetValue<bool?>("BackgroundWorkers:Enabled") ?? true;
+        if (backgroundWorkersEnabled)
+        {
+            services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.OutboxWorker>();
+            services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.LocalRetentionWorker>();
+            services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.CatalogSyncWorker>();
+            services.AddHostedService<TuColmadoRD.Infrastructure.CrossCutting.BackgroundServices.InventorySyncWorker>();
+        }
 
         return services;
     }

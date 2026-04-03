@@ -34,6 +34,9 @@ public static class CoreApiHostBuilder
         if (isLocal)
         {
             builder.Configuration["GatewayOptions:IsLocalMode"] = "true";
+            builder.Configuration["Persistence:EnableInMemoryFallback"] = "true";
+            builder.Configuration["BackgroundWorkers:Enabled"] = "false";
+            builder.Configuration["AuthApi:BaseUrl"] = "http://localhost:5300";
         }
 
         builder.Configuration
