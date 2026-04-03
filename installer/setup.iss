@@ -11,7 +11,7 @@
 #define AssetsDir "assets"
 #define WizardImagePath AddBackslash(SourcePath) + AssetsDir + "\\wizard.bmp"
 #define WizardSmallImagePath AddBackslash(SourcePath) + AssetsDir + "\\wizard-small.bmp"
-#define SetupIconPath AddBackslash(SourcePath) + AssetsDir + "\\setup.ico"
+#define SetupIconPath AddBackslash(SourcePath) + AssetsDir + "\\app.ico"
 
 [Setup]
 AppId={{E8A6E2E4-3C2A-49D2-BB48-7A02489A4472}

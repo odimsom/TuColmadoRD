@@ -13,12 +13,22 @@ public partial class MainForm : Form
     private Panel _splashPanel;
     private readonly string _startUrl;
     private bool _updateCheckStarted;
+    private bool _webViewInitialized;
 
     public MainForm(string startUrl)
     {
         _startUrl = startUrl;
         InitializeComponent();
-        ConfigureWebView();
+        this.Shown += async (_, _) =>
+        {
+            if (_webViewInitialized)
+            {
+                return;
+            }
+
+            _webViewInitialized = true;
+            await ConfigureWebViewAsync();
+        };
     }
 
     private void InitializeComponent()
@@ -27,13 +37,29 @@ public partial class MainForm : Form
         this.Size = new Size(1280, 800);
         this.MinimumSize = new Size(1024, 600);
         this.StartPosition = FormStartPosition.CenterScreen;
-        this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        var appIconPath = Path.Combine(AppContext.BaseDirectory, "app.ico");
+        if (File.Exists(appIconPath))
+        {
+            this.Icon = new Icon(appIconPath);
+        }
+        else
+        {
+            this.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+        }
 
         // Splash Panel
         _splashPanel = new Panel
         {
             Dock = DockStyle.Fill,
             BackColor = Color.FromArgb(15, 23, 42) // slate-900
+        };
+
+        var logoBox = new PictureBox
+        {
+            Size = new Size(120, 120),
+            SizeMode = PictureBoxSizeMode.Zoom,
+            Image = this.Icon?.ToBitmap(),
+            BackColor = Color.Transparent
         };
 
         var lblTitle = new Label
@@ -62,6 +88,7 @@ public partial class MainForm : Form
             MarqueeAnimationSpeed = 30
         };
 
+        _splashPanel.Controls.Add(logoBox);
         _splashPanel.Controls.Add(lblTitle);
         _splashPanel.Controls.Add(lblStatus);
         _splashPanel.Controls.Add(progressBar);
@@ -71,7 +98,8 @@ public partial class MainForm : Form
         // Center splash controls
         this.Load += (s, e) =>
         {
-            lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, (this.ClientSize.Height - lblTitle.Height) / 2 - 40);
+            logoBox.Location = new Point((this.ClientSize.Width - logoBox.Width) / 2, (this.ClientSize.Height - logoBox.Height) / 2 - 130);
+            lblTitle.Location = new Point((this.ClientSize.Width - lblTitle.Width) / 2, logoBox.Bottom + 12);
             lblStatus.Location = new Point((this.ClientSize.Width - lblStatus.Width) / 2, lblTitle.Bottom + 10);
             progressBar.Location = new Point((this.ClientSize.Width - progressBar.Width) / 2, lblStatus.Bottom + 30);
         };
@@ -102,7 +130,7 @@ public partial class MainForm : Form
         };
     }
 
-    private async void ConfigureWebView()
+    private async Task ConfigureWebViewAsync()
     {
         try
         {
