@@ -11,7 +11,18 @@ static class Program
     [STAThread]
     static void Main(string[] args)
     {
+        Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+        Application.ThreadException += (_, e) => AppLogger.Error("Unhandled UI exception", e.Exception);
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            if (e.ExceptionObject is Exception exception)
+            {
+                AppLogger.Error("Unhandled domain exception", exception);
+            }
+        };
+
         ApplicationConfiguration.Initialize();
+        AppLogger.Info("Desktop startup begin");
 
         using var splash = new SplashForm();
         splash.Show();
@@ -54,8 +65,12 @@ static class Program
         var hasIdentity = HasDeviceIdentity();
         var startUrl = "http://localhost:5100/auth/login";
 
-        splash.Hide();
         var mainForm = new MainForm(startUrl, openWebViewOnStart: !hasIdentity);
+        mainForm.Shown += (_, _) =>
+        {
+            AppLogger.Info("Main form shown");
+            splash.Close();
+        };
         Application.Run(mainForm);
     }
 

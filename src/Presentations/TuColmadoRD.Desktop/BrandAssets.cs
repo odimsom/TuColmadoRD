@@ -1,10 +1,14 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
 
 namespace TuColmadoRD.Desktop;
 
 internal static class BrandAssets
 {
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool DestroyIcon(IntPtr hIcon);
+
     public static Bitmap CreateLogoBitmap(int size)
     {
         var bmp = new Bitmap(size, size);
@@ -30,6 +34,20 @@ internal static class BrandAssets
         g.FillPath(redBrush, rightPath);
 
         return bmp;
+    }
+
+    public static Icon CreateLogoIcon(int size)
+    {
+        using var bitmap = CreateLogoBitmap(size);
+        var handle = bitmap.GetHicon();
+        try
+        {
+            return (Icon)Icon.FromHandle(handle).Clone();
+        }
+        finally
+        {
+            DestroyIcon(handle);
+        }
     }
 
     private static GraphicsPath CreateRoundedPath(Rectangle rect, int radius)
