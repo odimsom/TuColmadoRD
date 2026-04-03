@@ -24,22 +24,15 @@ static class Program
         ApplicationConfiguration.Initialize();
         AppLogger.Info("Desktop startup begin");
 
-        using var splash = new SplashForm();
-        splash.Show();
-        Application.DoEvents();
-
         // 1. Start Core API on 5200
-        splash.SetStatus("Iniciando API local...");
         var coreApp = CoreApiHostBuilder.BuildCoreApi(args, isLocal: true);
         _ = Task.Run(() => coreApp.RunAsync("http://localhost:5200"));
 
         // 2. Start Auth Mock on 5300
-        splash.SetStatus("Iniciando autenticacion local...");
         var authApp = AuthLocalHostBuilder.BuildAuthLocal(args);
         _ = Task.Run(() => authApp.RunAsync("http://localhost:5300"));
 
         // 3. Start Gateway on 5100
-        splash.SetStatus("Iniciando gateway local...");
         var gatewayApp = GatewayHostBuilder.BuildGateway(args, new GatewayOptions
         {
             IsLocalMode = true,
@@ -56,21 +49,12 @@ static class Program
 
         _ = Task.Run(() => gatewayApp.RunAsync("http://localhost:5100"));
 
-        // 4. Wait for Gateway to be ready (keep execution on STA thread)
-        splash.SetStatus("Verificando puertos locales...");
-        WaitForPort(5200, 30000).GetAwaiter().GetResult();
-        WaitForPort(5100, 30000).GetAwaiter().GetResult();
-
-        // 5. Run WinForms
+        // 4. Run WinForms immediately; the launcher will reflect service readiness.
         var hasIdentity = HasDeviceIdentity();
         var startUrl = "http://localhost:5100/auth/login";
 
         var mainForm = new MainForm(startUrl, openWebViewOnStart: !hasIdentity);
-        mainForm.Shown += (_, _) =>
-        {
-            AppLogger.Info("Main form shown");
-            splash.Close();
-        };
+        mainForm.Shown += (_, _) => AppLogger.Info("Main form shown");
         Application.Run(mainForm);
     }
 
@@ -85,21 +69,4 @@ static class Program
         return candidatePaths.Any(File.Exists);
     }
 
-    private static async Task WaitForPort(int port, int timeoutMs = 10000)
-    {
-        var startTime = DateTime.Now;
-        while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
-        {
-            try
-            {
-                using var client = new TcpClient();
-                await client.ConnectAsync("localhost", port);
-                return;
-            }
-            catch
-            {
-                await Task.Delay(500);
-            }
-        }
-    }
 }
