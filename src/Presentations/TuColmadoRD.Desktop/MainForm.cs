@@ -1,6 +1,8 @@
 using System;
+using System.IO;
 using System.Drawing;
 using System.Windows.Forms;
+using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 
 namespace TuColmadoRD.Desktop;
@@ -10,6 +12,7 @@ public partial class MainForm : Form
     private Microsoft.Web.WebView2.WinForms.WebView2 _webView;
     private Panel _splashPanel;
     private readonly string _startUrl;
+    private bool _updateCheckStarted;
 
     public MainForm(string startUrl)
     {
@@ -103,7 +106,20 @@ public partial class MainForm : Form
     {
         try
         {
-            await _webView.EnsureCoreWebView2Async(null);
+            var userDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "TuColmadoRD",
+                "WebView2"
+            );
+            Directory.CreateDirectory(userDataFolder);
+
+            var environment = await CoreWebView2Environment.CreateAsync(
+                browserExecutableFolder: null,
+                userDataFolder: userDataFolder,
+                options: new CoreWebView2EnvironmentOptions("--disable-features=msWebOOUI,msPdfOOUI")
+            );
+
+            await _webView.EnsureCoreWebView2Async(environment);
             
             #if !DEBUG
             _webView.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
@@ -117,6 +133,12 @@ public partial class MainForm : Form
             {
                 _splashPanel.Visible = false;
                 _webView.Visible = true;
+
+                if (!_updateCheckStarted)
+                {
+                    _updateCheckStarted = true;
+                    _ = CheckForUpdatesAsync();
+                }
             };
         }
         catch (Exception ex)
@@ -134,5 +156,32 @@ public partial class MainForm : Form
         }
         _splashPanel.Visible = false;
         _webView.Visible = true;
+    }
+
+    private async Task CheckForUpdatesAsync()
+    {
+        try
+        {
+            var result = await UpdateService.CheckForUpdateAsync();
+            if (!result.IsUpdateAvailable)
+            {
+                return;
+            }
+
+            var prompt = $"Hay una nueva version disponible: {result.LatestVersion}.\n\nDesea descargar e instalar ahora?";
+            var answer = MessageBox.Show(prompt, "Actualizacion disponible", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+            if (answer != DialogResult.Yes)
+            {
+                return;
+            }
+
+            var downloadedInstaller = await UpdateService.DownloadInstallerAsync(result.InstallerUrl!);
+            UpdateService.LaunchInstaller(downloadedInstaller);
+            Application.Exit();
+        }
+        catch
+        {
+            // Do not block POS startup if update check fails.
+        }
     }
 }

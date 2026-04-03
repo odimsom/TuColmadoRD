@@ -8,7 +8,7 @@ namespace TuColmadoRD.Desktop;
 static class Program
 {
     [STAThread]
-    static async Task Main(string[] args)
+    static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
 
@@ -37,8 +37,8 @@ static class Program
 
         _ = Task.Run(() => gatewayApp.RunAsync("http://localhost:5100"));
 
-        // 4. Wait for Gateway to be ready
-        await WaitForPort(5100);
+        // 4. Wait for Gateway to be ready (keep execution on STA thread)
+        WaitForPort(5100, 15000).GetAwaiter().GetResult();
 
         // 5. Run WinForms
         var mainForm = new MainForm("http://localhost:5100/portal/dashboard");
@@ -47,12 +47,12 @@ static class Program
 
     private static async Task WaitForPort(int port, int timeoutMs = 10000)
     {
-        using var client = new TcpClient();
         var startTime = DateTime.Now;
         while ((DateTime.Now - startTime).TotalMilliseconds < timeoutMs)
         {
             try
             {
+                using var client = new TcpClient();
                 await client.ConnectAsync("localhost", port);
                 return;
             }
