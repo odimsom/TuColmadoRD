@@ -20,7 +20,6 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
     <ProjectReference Include="..\TuColmadoRD.ApiGateway\TuColmadoRD.ApiGateway.csproj" Properties="Configuration=DesktopPublish" />
     <ProjectReference Include="..\TuColmadoRD.Presentation.API\TuColmadoRD.Presentation.API.csproj" Properties="Configuration=DesktopPublish" />
     <ProjectReference Include="..\..\infrastructure\TuColmadoRD.Infrastructure.IOC\TuColmadoRD.Infrastructure.IOC.csproj" />
