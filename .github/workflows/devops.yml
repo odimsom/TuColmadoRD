@@ -29,13 +29,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore TuColmadoRD.slnx
+        run: dotnet restore TuColmadoRD.slnx -p:EnableWindowsTargeting=true
 
       - name: Build
-        run: dotnet build TuColmadoRD.slnx --no-restore
+        run: dotnet build TuColmadoRD.slnx --no-restore -p:EnableWindowsTargeting=true
 
       - name: Test
-        run: dotnet test TuColmadoRD.slnx --no-build --verbosity normal
+        run: dotnet test TuColmadoRD.slnx --no-build --verbosity normal -p:EnableWindowsTargeting=true
 
   integrate_to_qa:
     needs: test
