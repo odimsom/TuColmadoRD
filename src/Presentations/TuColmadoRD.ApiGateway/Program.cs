@@ -1,5 +1,6 @@
 using System.Text;
 using System.IO;
+using System.Net;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -91,6 +92,19 @@ public static class GatewayHostBuilder
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseMiddleware<IdempotencyMiddleware>();
+
+        app.MapGet("/gateway/health/cloud", async () =>
+        {
+            try
+            {
+                await Dns.GetHostEntryAsync("api.github.com");
+                return Results.Ok(new { connected = true });
+            }
+            catch
+            {
+                return Results.Ok(new { connected = false });
+            }
+        });
 
         var authGroup = app.MapGroup("/gateway/auth");
 
