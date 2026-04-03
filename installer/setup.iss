@@ -22,7 +22,7 @@ MinVersion=10.0
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "Crear ícono en el escritorio"; Flags: checked
+Name: "desktopicon"; Description: "Crear ícono en el escritorio"; Flags: checkedonce
 Name: "startupicon"; Description: "Iniciar TuColmadoRD con Windows"; Flags: unchecked
 
 [Files]

@@ -7,6 +7,21 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)' == 'DesktopPublish'">
+    <ExcludeAppSettingsFromPublish>true</ExcludeAppSettingsFromPublish>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(ExcludeAppSettingsFromPublish)' == 'true'">
+    <None Update="appsettings*.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </None>
+    <Content Update="appsettings*.json">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
