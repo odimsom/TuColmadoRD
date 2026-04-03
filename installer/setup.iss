@@ -3,6 +3,11 @@
   #define AppVersion "0.1.0-test"
 #endif
 
+#define AppVersionNumeric GetEnv("AppVersionNumeric")
+#if AppVersionNumeric == ""
+  #define AppVersionNumeric "0.1.0.0"
+#endif
+
 #define AssetsDir "assets"
 #define WizardImagePath AddBackslash(SourcePath) + AssetsDir + "\\wizard.bmp"
 #define WizardSmallImagePath AddBackslash(SourcePath) + AssetsDir + "\\wizard-small.bmp"
@@ -20,7 +25,7 @@ AppUpdatesURL=https://tucolmadord.com
 AppCopyright=Copyright (c) 2026 Synset Solutions
 VersionInfoCompany=Synset Solutions
 VersionInfoProductName=TuColmadoRD
-VersionInfoProductVersion={#AppVersion}
+VersionInfoProductVersion={#AppVersionNumeric}
 VersionInfoTextVersion={#AppVersion}
 DefaultDirName={autopf}\TuColmadoRD
 DefaultGroupName=TuColmadoRD
